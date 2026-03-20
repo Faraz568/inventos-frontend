@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import AppLayout from '../../components/layout/AppLayout'
+import ViewToggle from '../../components/ui/ViewToggle'
 import Modal from '../../components/ui/Modal'
 import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import { useToast } from '../../context/ToastContext'
@@ -460,6 +461,8 @@ export default function PurchasesPage() {
 
       {/* Toolbar */}
       <div className="toolbar">
+        <ViewToggle view={view} onChange={setView} />
+        <ViewToggle view={view} onChange={setView} />
         <div className="search-wrap">
           <span className="search-icon" style={{ fontSize:13 }}>⌕</span>
           <input className="search-input" placeholder="Search product or supplier…"
@@ -478,70 +481,65 @@ export default function PurchasesPage() {
         </button>
       </div>
 
-      {/* Table */}
-      <div className="table-wrap">
-        {loading ? (
-          <div style={{ padding:52, textAlign:'center' }}>
-            <span className="spinner" style={{ width:22, height:22 }} />
-            <div style={{ color:'var(--muted)', fontFamily:'var(--mono)', fontSize:11, marginTop:10 }}>Loading purchases…</div>
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="empty-state">
-            <span className="empty-icon">🛒</span>
-            <strong>{search || statusFilter ? 'No purchases match your filters.' : 'No purchases yet.'}</strong>
-            <span style={{ fontSize:12 }}>
-              {search || statusFilter ? 'Try clearing filters.' : 'Click "+ New Purchase Order" to add.'}
-            </span>
-          </div>
-        ) : (
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th className="hide-mobile">ID</th>
-                <th className="sort" onClick={() => handleSort('productName')}>Product <SortArrow col="productName" /></th>
-                <th className="sort hide-mobile" onClick={() => handleSort('supplierName')}>Supplier <SortArrow col="supplierName" /></th>
-                <th className="sort" onClick={() => handleSort('quantity')}>Qty <SortArrow col="quantity" /></th>
-                <th className="sort hide-mobile" onClick={() => handleSort('unitCost')}>Unit Cost <SortArrow col="unitCost" /></th>
-                <th className="sort" onClick={() => handleSort('totalCost')}>Total <SortArrow col="totalCost" /></th>
-                <th>Status</th>
-                <th className="sort" onClick={() => handleSort('purchasedAt')}>Date <SortArrow col="purchasedAt" /></th>
-                <th style={{ textAlign:'right' }}>Actions</th>
+      {/* Table / Card View */}
+      {loading ? (
+        <div style={{ padding:40, textAlign:'center' }}><span className="spinner" style={{ width:22, height:22 }} /></div>
+      ) : filtered.length === 0 ? (
+        <div className="empty-state"><span className="empty-icon">🛒</span><strong>No purchases{search||statusFilter?' match filters':' yet'}.</strong></div>
+      ) : view === 'table' ? (
+        <div className="table-wrap">
+          <table className="data-table" style={{ minWidth:620 }}>
+            <thead><tr>
+              <th className="sort" onClick={()=>handleSort('productName')}>Product <SortArrow col="productName"/></th>
+              <th className="sort" onClick={()=>handleSort('supplierName')}>Supplier <SortArrow col="supplierName"/></th>
+              <th className="sort" onClick={()=>handleSort('quantity')}>Qty <SortArrow col="quantity"/></th>
+              <th className="sort" onClick={()=>handleSort('totalCost')}>Total <SortArrow col="totalCost"/></th>
+              <th>Status</th>
+              <th className="sort" onClick={()=>handleSort('purchasedAt')}>Date <SortArrow col="purchasedAt"/></th>
+              <th style={{textAlign:'right'}}>Actions</th>
+            </tr></thead>
+            <tbody>{filtered.map(p=>(
+              <tr key={p.id}>
+                <td><div style={{fontWeight:500}}>{p.productName}</div><div style={{color:'var(--muted)',fontSize:11}}>{p.categoryName}</div></td>
+                <td style={{color:'var(--muted)',fontSize:12}}>{p.supplierName}</td>
+                <td className="mono">{p.quantity}</td>
+                <td className="mono" style={{fontWeight:600,color:'var(--teal)'}}>₹{Number(p.totalCost).toLocaleString('en-IN',{minimumFractionDigits:2})}</td>
+                <td>{statusBadge(p.status)}</td>
+                <td className="mono muted" style={{fontSize:11}}>{new Date(p.purchasedAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</td>
+                <td><div style={{display:'flex',gap:5,justifyContent:'flex-end'}}>
+                  <button className="btn-icon" style={{color:'var(--teal)'}} onClick={()=>printPurchaseOrder(`PO-${String(p.id).padStart(5,'0')}`,{supplierName:p.supplierName,status:p.status,purchasedAt:p.purchasedAt,note:p.note},[{productName:p.productName,categoryName:p.categoryName,qty:p.quantity,unitCost:p.unitCost}])}>⎙</button>
+                  <button className="btn-icon" style={{color:'var(--blue)'}} onClick={()=>setEditTarget(p)}>✎</button>
+                  <button className="btn-icon danger" onClick={()=>setDelTarget(p)}>✕</button>
+                </div></td>
               </tr>
-            </thead>
-            <tbody>
-              {filtered.map(p => (
-                <tr key={p.id}>
-                  <td className="mono muted" style={{ fontSize:11 }}>#{p.id}</td>
-                  <td>
-                    <div style={{ fontWeight:500 }}>{p.productName}</div>
-                    <div style={{ color:'var(--muted)', fontSize:11 }}>{p.categoryName}</div>
-                  </td>
-                  <td style={{ color:'var(--muted)', fontSize:13 }}>{p.supplierName}</td>
-                  <td className="mono">{p.quantity}</td>
-                  <td className="mono" style={{ color:'var(--muted)' }}>₹{Number(p.unitCost).toLocaleString('en-IN',{minimumFractionDigits:2})}</td>
-                  <td className="mono" style={{ fontWeight:600, color:'var(--teal)' }}>₹{Number(p.totalCost).toLocaleString('en-IN',{minimumFractionDigits:2})}</td>
-                  <td>{statusBadge(p.status)}</td>
-                  <td className="mono muted" style={{ fontSize:11 }}>
-                    {new Date(p.purchasedAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}
-                  </td>
-                  <td>
-                    <div style={{ display:'flex', gap:6, justifyContent:'flex-end' }}>
-                      <button className="btn-icon" title="Print Purchase Order" style={{ color:'var(--teal)' }}
-                        onClick={() => printPurchaseOrder(
-                          `PO-${String(p.id).padStart(5,'0')}`,
-                          { supplierName: p.supplierName, status: p.status, purchasedAt: p.purchasedAt, note: p.note },
-                          [{ productName: p.productName, categoryName: p.categoryName, qty: p.quantity, unitCost: p.unitCost }]
-                        )}>⎙</button>
-                      <button className="btn-icon" title="Edit" style={{ color:'var(--blue)' }} onClick={() => setEditTarget(p)}>✎</button>
-                      <button className="btn-icon danger" title="Delete" onClick={() => setDelTarget(p)}>✕</button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
+            ))}</tbody>
           </table>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))',gap:12}}>
+          {filtered.map(p=>(
+            <div key={p.id} className="card" style={{padding:14}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:8}}>
+                <div><div style={{fontWeight:600,fontSize:13}}>{p.productName}</div><div style={{fontSize:11,color:'var(--text-3)',marginTop:2}}>{p.categoryName}</div></div>
+                {statusBadge(p.status)}
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6,marginBottom:10}}>
+                {[{label:'Supplier',value:p.supplierName},{label:'Qty',value:p.quantity},{label:'Unit Cost',value:`₹${Number(p.unitCost).toLocaleString('en-IN')}`},{label:'Total',value:`₹${Number(p.totalCost).toLocaleString('en-IN')}`,color:'var(--teal)'},{label:'Date',value:new Date(p.purchasedAt).toLocaleDateString('en-IN',{day:'numeric',month:'short'})},{label:'Supplier',value:p.supplierName}].slice(0,4).map(r=>(
+                  <div key={r.label} style={{background:'var(--raised)',borderRadius:6,padding:'6px 8px'}}>
+                    <div style={{fontSize:10,color:'var(--text-3)',marginBottom:2}}>{r.label}</div>
+                    <div style={{fontSize:12,fontFamily:'var(--mono)',fontWeight:500,color:r.color||'var(--text)'}}>{r.value}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{display:'flex',gap:6,justifyContent:'flex-end',borderTop:'1px solid var(--border)',paddingTop:8}}>
+                <button className="btn-icon" style={{color:'var(--teal)'}} onClick={()=>printPurchaseOrder(`PO-${String(p.id).padStart(5,'0')}`,{supplierName:p.supplierName,status:p.status,purchasedAt:p.purchasedAt,note:p.note},[{productName:p.productName,categoryName:p.categoryName,qty:p.quantity,unitCost:p.unitCost}])}>⎙</button>
+                <button className="btn-icon" style={{color:'var(--blue)'}} onClick={()=>setEditTarget(p)}>✎</button>
+                <button className="btn-icon danger" onClick={()=>setDelTarget(p)}>✕</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {!loading && (
         <div style={{ display:'flex', justifyContent:'space-between', flexWrap:'wrap', gap:8, alignItems:'center', flexWrap:'wrap', gap:8, marginTop:12 }}>

@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import AppLayout from '../../components/layout/AppLayout'
+import ViewToggle from '../../components/ui/ViewToggle'
+import ViewToggle from '../../components/ui/ViewToggle'
 import Modal from '../../components/ui/Modal'
 import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import { useToast } from '../../context/ToastContext'
@@ -279,6 +281,26 @@ export default function DatabasePage() {
                 </table>
             }
           </div>
+          ) : (
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(220px,1fr))',gap:12}}>
+            {categories.map(c2 => {
+              const prodCount = products.filter(p => p.categoryId === c2.id || p.categoryName === c2.name).length
+              return (
+              <div key={c2.id} className="card" style={{padding:14}}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:8}}>
+                  <div style={{fontWeight:600,fontSize:13}}>{c2.name}</div>
+                  <span style={{background:'var(--accent-dim)',color:'var(--accent)',borderRadius:4,fontSize:11,fontFamily:'var(--mono)',padding:'2px 8px'}}>{prodCount} items</span>
+                </div>
+                {c2.description && <div style={{fontSize:12,color:'var(--text-3)',marginBottom:8}}>{c2.description}</div>}
+                {c2.createdAt && <div style={{fontSize:10,color:'var(--text-3)',fontFamily:'var(--mono)',marginBottom:8}}>{new Date(c2.createdAt).toLocaleDateString('en-IN')}</div>}
+                {isAdmin && <div style={{display:'flex',gap:6,justifyContent:'flex-end',borderTop:'1px solid var(--border)',paddingTop:8}}>
+                  <button className="btn-icon" style={{color:'var(--blue)'}} onClick={() => setCatModal(c2)}>✎ Edit</button>
+                  <button className="btn-icon danger" onClick={() => setCatDelete(c2)}>✕</button>
+                </div>}
+              </div>
+            )})}
+          </div>
+          )}
         </>
       )}
 
@@ -290,6 +312,7 @@ export default function DatabasePage() {
               <span className="search-icon" style={{ fontSize:13 }}>⌕</span>
               <input className="search-input" placeholder="Search products or SKU…" value={prodSearch} onChange={e => setProdSearch(e.target.value)} />
             </div>
+            <ViewToggle view={view} onChange={setView} />
             {isAdmin && (
               <button className="btn btn-primary" style={{ marginLeft:'auto' }} onClick={() => { loadCategories(); setProdModal('add') }}>
                 + Add Product
@@ -297,6 +320,7 @@ export default function DatabasePage() {
             )}
           </div>
 
+          {view === 'table' ? (
           <div className="table-wrap">
             {prodLoading
               ? <div style={{ padding:40, textAlign:'center' }}><span className="spinner" style={{ width:22, height:22 }} /></div>

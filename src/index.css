@@ -641,7 +641,7 @@ html, body, #root {
   opacity: 0;
   transition: opacity 240ms ease;
 }
-.mobile-drawer-backdrop.open { display: block; opacity: 1; }
+.mobile-drawer-backdrop.open { opacity: 1; }
 
 .mobile-drawer {
   position: fixed;
@@ -774,7 +774,7 @@ html, body, #root {
   .search-btn-label,
   .search-kbd              { display: none; }
   .search-btn              { padding: 6px 8px; }
-
+  .mobile-drawer-backdrop  { display: block; }
   .topnav-wrap             { padding: 10px 12px; }
   .topnav                  { padding: 0 10px; height: 46px; }
   .topnav-wrap.scrolled    { padding: 6px 12px; }
@@ -885,6 +885,7 @@ html, body, #root {
   }
   .mobile-drawer-backdrop {
     z-index: 9998;
+    pointer-events: all;
   }
   /* Fix table overflow - force scroll container */
   .table-wrap {
@@ -901,4 +902,19 @@ html, body, #root {
   .app-layout {
     overflow-x: hidden;
   }
+}
+
+/* ══════════════════════════════════════════════════
+   TABLE / CARD VIEW TOGGLE
+══════════════════════════════════════════════════ */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+@media (max-width: 820px) {
+  .card-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .card-grid { gap: 8px; }
 }

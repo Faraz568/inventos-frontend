@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import AppLayout from '../../components/layout/AppLayout'
+import ViewToggle from '../../components/ui/ViewToggle'
 import { getProducts } from '../../api/productApi'
 import { getCategories } from '../../api/categoryApi'
 import { getSales, mockSales } from '../../api/salesApi'
@@ -150,6 +151,7 @@ export default function StockBalancePage() {
 
       {/* Filters */}
       <div style={{ display:'flex', gap:10, marginBottom:14, flexWrap:'wrap', alignItems:'center' }}>
+        <ViewToggle view={view} onChange={setView} />
         <div className="search-wrap">
           <span className="search-icon">⌕</span>
           <input className="search-input" placeholder="Search products or SKU…" value={search} onChange={e=>setSearch(e.target.value)}/>
@@ -165,10 +167,10 @@ export default function StockBalancePage() {
 
       {/* Table */}
       <div className={`grid-main-aside-280${!selected ? ' grid-single' : ''}`}>
-        <div className="table-wrap">
-          {loading ? <div style={{ padding:40, textAlign:'center' }}><span className="spinner" style={{ width:20, height:20 }}/></div>
+        {loading ? <div style={{ padding:40, textAlign:'center' }}><span className="spinner" style={{ width:20, height:20 }}/></div>
           : filtered.length===0 ? <div className="empty-state"><span className="empty-icon">⚖</span><span>No products found.</span></div>
-          : (
+          : view === 'table' ? (
+        <div className="table-wrap">(
             <table className="data-table">
               <thead>
                 <tr>
@@ -212,8 +214,32 @@ export default function StockBalancePage() {
                 })}
               </tbody>
             </table>
-          )}
+          )
         </div>
+          ) : (
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(240px,1fr))',gap:12}}>
+          {filtered.map(p => {
+            const status = p.quantity === 0 ? 'out' : p.quantity <= p.reorderLevel ? 'low' : 'ok'
+            return (
+            <div key={p.id} className="card" style={{padding:14,cursor:'pointer',border:selected===p.id?'1px solid var(--accent)':'1px solid var(--border)'}} onClick={()=>setSelected(selected===p.id?null:p.id)}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:8}}>
+                <div><div style={{fontWeight:600,fontSize:13}}>{p.name}</div>{p.sku&&<div style={{fontFamily:'var(--mono)',fontSize:10,color:'var(--text-3)'}}>{p.sku}</div>}</div>
+                {status==='out'&&<span className="badge badge-out">Out</span>}
+                {status==='low'&&<span className="badge badge-low">Low</span>}
+                {status==='ok' &&<span className="badge badge-ok">OK</span>}
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
+                {[{label:'Category',value:p.categoryName},{label:'Qty',value:p.quantity,color:status==='out'?'var(--red)':status==='low'?'var(--amber)':'var(--text)'},{label:'Stock Value',value:fmt(p.stockVal)},{label:'Retail Value',value:fmt(p.retailVal)},{label:'Pot. Profit',value:fmt(p.potProfit),color:p.potProfit>=0?'var(--green)':'var(--red)'},{label:'Total In',value:`+${p.totalIn}`}].map(r=>(
+                  <div key={r.label} style={{background:'var(--raised)',borderRadius:6,padding:'6px 8px'}}>
+                    <div style={{fontSize:10,color:'var(--text-3)',marginBottom:2}}>{r.label}</div>
+                    <div style={{fontSize:12,fontFamily:'var(--mono)',fontWeight:500,color:r.color||'var(--text)'}}>{r.value}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )})}
+        </div>
+          )}
 
         {selected && (()=>{
           const p = filtered.find(x=>x.id===selected)

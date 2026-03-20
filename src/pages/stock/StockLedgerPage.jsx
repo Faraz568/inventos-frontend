@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import AppLayout from '../../components/layout/AppLayout'
+import ViewToggle from '../../components/ui/ViewToggle'
 import { DEMO_MODE } from '../../api/axiosInstance'
 import { getSales, mockSales } from '../../api/salesApi'
 import { getPurchases, mockPurchases } from '../../api/purchaseApi'
@@ -52,6 +53,7 @@ function getProductOptions(sales, purchases) {
 
 export default function StockLedgerPage() {
   const [productFilter, setProduct] = useState('')
+  const [view, setView] = useState('table')
   const [typeFilter,    setType]    = useState('')
   const [dateFrom,      setFrom]    = useState('')
   const [dateTo,        setTo]      = useState('')
@@ -174,72 +176,57 @@ export default function StockLedgerPage() {
         <span style={{ marginLeft:'auto', fontSize:12, color:'var(--text-3)' }}>{ledger.length} entries</span>
       </div>
 
-      {/* Table */}
-      <div className="table-wrap">
-        {ledger.length===0 ? (
-          <div className="empty-state">
-            <span className="empty-icon">📒</span>
-            <span>No ledger entries match your filters.</span>
-            {hasFilters && <button className="btn btn-ghost btn-sm" onClick={clear}>Clear filters</button>}
-          </div>
-        ) : (
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Date</th><th className="hide-mobile">Reference</th><th>Type</th><th>Product</th><th>Category</th>
-                <th className="hide-mobile">Party</th><th style={{ textAlign:'right' }}>Qty In</th>
-                <th style={{ textAlign:'right' }}>Qty Out</th>
-                <th style={{ textAlign:'right' }}>Balance</th>
-                <th style={{ textAlign:'right' }}>Rate</th>
-                <th className="hide-mobile" style={{ textAlign:'right' }}>Value</th>
-                <th className="hide-mobile">Note</th>
+      {/* Table / Card */}
+      {ledger.length===0 ? (
+        <div className="empty-state"><span className="empty-icon">📒</span><span>No ledger entries match your filters.</span>{hasFilters && <button className="btn btn-ghost btn-sm" onClick={clear}>Clear filters</button>}</div>
+      ) : view === 'table' ? (
+        <div className="table-wrap">
+          <table className="data-table" style={{minWidth:700}}>
+            <thead><tr>
+              <th>Date</th><th>Ref</th><th>Type</th><th>Product</th><th>Category</th>
+              <th>Party</th><th style={{textAlign:'right'}}>In</th><th style={{textAlign:'right'}}>Out</th>
+              <th style={{textAlign:'right'}}>Balance</th><th style={{textAlign:'right'}}>Rate</th><th style={{textAlign:'right'}}>Value</th><th>Note</th>
+            </tr></thead>
+            <tbody>{ledger.map(e=>(
+              <tr key={e.id}>
+                <td className="mono muted" style={{fontSize:11,whiteSpace:'nowrap'}}>{new Date(e.date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'2-digit'})}</td>
+                <td><span className="mono" style={{fontSize:11,fontWeight:600,borderRadius:4,padding:'1px 6px',color:e.type==='in'?'var(--accent)':'#7c3aed',background:e.type==='in'?'var(--accent-dim)':'rgba(124,58,237,.1)'}}>{e.reference}</span></td>
+                <td><span className={`badge ${e.type==='in'?'badge-ok':'badge-info'}`} style={{fontSize:10.5}}>{e.type==='in'?'↑ In':'↓ Out'}</span></td>
+                <td style={{fontWeight:500}}>{e.productName}</td>
+                <td><span className="tag">{e.categoryName}</span></td>
+                <td style={{fontSize:12,color:'var(--text-2)'}}>{e.party}</td>
+                <td className="mono" style={{textAlign:'right',color:'var(--green)',fontWeight:500}}>{e.type==='in'?`+${e.qtyAbs}`:'—'}</td>
+                <td className="mono" style={{textAlign:'right',color:'var(--red)',fontWeight:500}}>{e.type==='out'?`−${e.qtyAbs}`:'—'}</td>
+                <td className="mono" style={{textAlign:'right',fontWeight:700,color:e.runningBalance<0?'var(--red)':e.runningBalance===0?'var(--text-3)':'var(--text)'}}>{e.runningBalance}</td>
+                <td className="mono" style={{textAlign:'right',fontSize:11.5,color:'var(--text-2)'}}>₹{Number(e.rate||0).toLocaleString('en-IN')}</td>
+                <td className="mono" style={{textAlign:'right',fontWeight:500,color:e.type==='in'?'var(--green)':'var(--red)'}}>{e.type==='in'?'+':'-'}{fmt(e.amount)}</td>
+                <td style={{fontSize:11.5,color:'var(--text-3)'}}>{e.note||'—'}</td>
               </tr>
-            </thead>
-            <tbody>
-              {ledger.map(e=>(
-                <tr key={e.id}>
-                  <td className="mono muted hide-mobile" style={{ fontSize:11, whiteSpace:'nowrap' }}>
-                    {new Date(e.date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'2-digit'})}
-                  </td>
-                  <td>
-                    <span className="mono" style={{
-                      fontSize:11, fontWeight:600, borderRadius:4, padding:'1px 6px',
-                      color:e.type==='in'?'var(--accent)':'#7c3aed',
-                      background:e.type==='in'?'var(--accent-dim)':'rgba(124,58,237,.1)',
-                    }}>{e.reference}</span>
-                  </td>
-                  <td>
-                    <span className={`badge ${e.type==='in'?'badge-ok':'badge-info'}`} style={{ fontSize:10.5 }}>
-                      {e.type==='in'?'↑ In':'↓ Out'}
-                    </span>
-                  </td>
-                  <td style={{ fontWeight:500 }}>{e.productName}</td>
-                  <td><span className="tag">{e.categoryName}</span></td>
-                  <td style={{ fontSize:12, color:'var(--text-2)' }}>{e.party}</td>
-                  <td className="mono" style={{ textAlign:'right', color:'var(--green)', fontWeight:500 }}>
-                    {e.type==='in'?`+${e.qtyAbs}`:'—'}
-                  </td>
-                  <td className="mono" style={{ textAlign:'right', color:'var(--red)', fontWeight:500 }}>
-                    {e.type==='out'?`−${e.qtyAbs}`:'—'}
-                  </td>
-                  <td className="mono" style={{ textAlign:'right', fontWeight:700, color:e.runningBalance<0?'var(--red)':e.runningBalance===0?'var(--text-3)':'var(--text)' }}>
-                    {e.runningBalance}
-                  </td>
-                  <td className="mono" style={{ textAlign:'right', fontSize:11.5, color:'var(--text-2)' }}>
-                    ₹{Number(e.rate||0).toLocaleString('en-IN')}
-                  </td>
-                  <td className="mono" style={{ textAlign:'right', fontWeight:500, color:e.type==='in'?'var(--green)':'var(--red)' }}>
-                    {e.type==='in'?'+':'-'}{fmt(e.amount)}
-                  </td>
-                  <td className="hide-mobile" style={{ fontSize:11.5, color:'var(--text-3)', maxWidth:120, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
-                    {e.note||'—'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
+            ))}</tbody>
           </table>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))',gap:12}}>
+          {ledger.map(e=>(
+            <div key={e.id} className="card" style={{padding:14,borderLeft:`3px solid ${e.type==='in'?'var(--green)':'var(--red)'}`}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
+                <span className="mono" style={{fontSize:11,fontWeight:600,color:e.type==='in'?'var(--accent)':'#7c3aed'}}>{e.reference}</span>
+                <span className={`badge ${e.type==='in'?'badge-ok':'badge-info'}`}>{e.type==='in'?'↑ In':'↓ Out'}</span>
+              </div>
+              <div style={{fontWeight:600,fontSize:13,marginBottom:4}}>{e.productName}</div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:5,marginTop:6}}>
+                {[{label:'Category',value:e.categoryName},{label:'Party',value:e.party||'—'},{label:'Qty',value:e.type==='in'?`+${e.qtyAbs}`:`−${e.qtyAbs}`,color:e.type==='in'?'var(--green)':'var(--red)'},{label:'Balance',value:e.runningBalance,color:e.runningBalance<0?'var(--red)':'var(--text)'},{label:'Value',value:`${e.type==='in'?'+':'-'}${fmt(e.amount)}`,color:e.type==='in'?'var(--green)':'var(--red)'},{label:'Date',value:new Date(e.date).toLocaleDateString('en-IN',{day:'numeric',month:'short'})}].map(r=>(
+                  <div key={r.label} style={{background:'var(--raised)',borderRadius:6,padding:'5px 8px'}}>
+                    <div style={{fontSize:10,color:'var(--text-3)',marginBottom:1}}>{r.label}</div>
+                    <div style={{fontSize:12,fontFamily:'var(--mono)',fontWeight:500,color:r.color||'var(--text)'}}>{r.value}</div>
+                  </div>
+                ))}
+              </div>
+              {e.note&&<div style={{marginTop:6,fontSize:11,color:'var(--text-3)',fontStyle:'italic'}}>{e.note}</div>}
+            </div>
+          ))}
+        </div>
+      )}
 
       <div style={{ marginTop:12, display:'flex', gap:16, fontSize:11.5, color:'var(--text-3)' }}>
         <span><span style={{ color:'var(--green)', fontWeight:600 }}>↑ In</span> = Purchase received</span>

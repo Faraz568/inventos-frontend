@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import AppLayout from '../../components/layout/AppLayout'
+import ViewToggle from '../../components/ui/ViewToggle'
 import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import { useToast } from '../../context/ToastContext'
 import { useAuth } from '../../context/AuthContext'
@@ -572,79 +573,53 @@ export default function SalesInvoicePage() {
           
           <div>
             
-            <div style={{ marginBottom:12 }}>
-              <div className="search-wrap">
+            <div style={{ marginBottom:12, display:'flex', gap:8, alignItems:'center', flexWrap:'wrap' }}>
+              <ViewToggle view={view} onChange={setView} />
+              <div className="search-wrap" style={{ flex:1 }}>
                 <span className="search-icon">⌕</span>
                 <input className="search-input" placeholder="Search by invoice number, customer, or product…"
                   value={search} onChange={e=>setSearch(e.target.value)} style={{ width:"100%", maxWidth:320 }}/>
               </div>
             </div>
 
+            {view === 'table' ? (
             <div className="table-wrap">
-              {loading ? (
-                <div style={{ padding:52, textAlign:'center' }}>
-                  <span className="spinner" style={{ width:22, height:22, borderWidth:2.5 }}/>
-                </div>
-              ) : filtered.length===0 ? (
-                <div className="empty-state">
-                  <span className="empty-icon">📄</span>
-                  <strong>{search?'No invoices match your search.':'No invoices yet.'}</strong>
-                  <span style={{ fontSize:12 }}>{search?'Try different terms.':'Click "+ New Invoice" to create your first.'}</span>
-                </div>
-              ) : (
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th>Invoice No.</th>
-                      <th>Customer</th>
-                      <th>Items</th>
-                      <th className="hide-mobile">Sold By</th>
-                      <th className="hide-mobile">Date</th>
-                      <th style={{ textAlign:'right' }}>Total</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filtered.map(inv=>(
-                      <tr key={inv.invoiceNo}
-                        onClick={()=>setSelInvoice(inv.invoiceNo===selInvoice?.invoiceNo?null:inv)}
-                        style={{ cursor:'pointer', background:selInvoice?.invoiceNo===inv.invoiceNo?'var(--accent-dim)':'' }}>
-                        <td>
-                          <span className="mono" style={{ fontWeight:700, color:'var(--accent)', fontSize:12.5 }}>{inv.invoiceNo}</span>
-                        </td>
-                        <td>
-                          {inv.customerName
-                            ? <span style={{ fontWeight:500 }}>{inv.customerName}</span>
-                            : <span style={{ color:'var(--text-3)', fontSize:12 }}>—</span>}
-                        </td>
-                        <td>
-                          <div style={{ display:'flex', flexWrap:'wrap', gap:4 }}>
-                            {inv.lines.slice(0,2).map((l,i)=>(
-                              <span key={i} className="tag" style={{ fontSize:11 }}>{l.productName} ×{l.quantity}</span>
-                            ))}
-                            {inv.lines.length>2 && <span style={{ fontSize:11, color:'var(--text-3)' }}>+{inv.lines.length-2} more</span>}
-                          </div>
-                        </td>
-                        <td style={{ color:'var(--text-3)', fontSize:12 }}>{inv.soldBy}</td>
-                        <td className="mono muted" style={{ fontSize:11.5 }}>
-                          {new Date(inv.soldAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}
-                        </td>
-                        <td className="mono" style={{ textAlign:'right', fontWeight:700, color:'var(--green)', fontSize:13 }}>
-                          {fmt(inv.total)}
-                        </td>
-                        <td>
-                          <div style={{ display:'flex', gap:4, justifyContent:'flex-end' }}>
-                            <button className="btn-icon" title="Print" onClick={e=>{e.stopPropagation();handlePrint(inv)}}>🖨</button>
-                            <button className="btn-icon danger" title="Delete" onClick={e=>{e.stopPropagation();setDeleteTarget(inv)}}>✕</button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
+              <table className="data-table" style={{minWidth:580}}>
+                <thead><tr>
+                  <th>Invoice No.</th><th>Customer</th><th>Items</th><th>Sold By</th><th>Date</th><th style={{textAlign:'right'}}>Total</th><th></th>
+                </tr></thead>
+                <tbody>{filtered.map(inv=>(
+                  <tr key={inv.invoiceNo} onClick={()=>setSelInvoice(inv.invoiceNo===selInvoice?.invoiceNo?null:inv)} style={{cursor:'pointer',background:selInvoice?.invoiceNo===inv.invoiceNo?'var(--accent-dim)':''}}>
+                    <td><span className="mono" style={{fontWeight:700,color:'var(--accent)',fontSize:12.5}}>{inv.invoiceNo}</span></td>
+                    <td>{inv.customerName?<span style={{fontWeight:500}}>{inv.customerName}</span>:<span style={{color:'var(--text-3)',fontSize:12}}>—</span>}</td>
+                    <td><div style={{display:'flex',flexWrap:'wrap',gap:4}}>{inv.lines.slice(0,2).map((l,i)=><span key={i} className="tag" style={{fontSize:11}}>{l.productName} ×{l.quantity}</span>)}{inv.lines.length>2&&<span style={{fontSize:11,color:'var(--text-3)'}}>+{inv.lines.length-2} more</span>}</div></td>
+                    <td style={{color:'var(--text-3)',fontSize:12}}>{inv.soldBy}</td>
+                    <td className="mono muted" style={{fontSize:11.5}}>{new Date(inv.soldAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</td>
+                    <td className="mono" style={{textAlign:'right',fontWeight:700,color:'var(--green)',fontSize:13}}>{fmt(inv.total)}</td>
+                    <td><div style={{display:'flex',gap:4,justifyContent:'flex-end'}}><button className="btn-icon" onClick={e=>{e.stopPropagation();handlePrint(inv)}}>🖨</button><button className="btn-icon danger" onClick={e=>{e.stopPropagation();setDeleteTarget(inv)}}>✕</button></div></td>
+                  </tr>
+                ))}</tbody>
+              </table>
             </div>
-          </div>
+            ) : (
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))',gap:12,padding:12}}>
+              {filtered.map(inv=>(
+                <div key={inv.invoiceNo} className="card" style={{padding:14,cursor:'pointer',border:selInvoice?.invoiceNo===inv.invoiceNo?'1px solid var(--accent)':'1px solid var(--border)'}} onClick={()=>setSelInvoice(inv.invoiceNo===selInvoice?.invoiceNo?null:inv)}>
+                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:8}}>
+                    <span className="mono" style={{fontWeight:700,color:'var(--accent)',fontSize:13}}>{inv.invoiceNo}</span>
+                    <span className="mono" style={{fontWeight:700,color:'var(--green)',fontSize:14}}>{fmt(inv.total)}</span>
+                  </div>
+                  <div style={{fontWeight:500,fontSize:13,marginBottom:2}}>{inv.customerName||<span style={{color:'var(--text-3)'}}>Walk-in</span>}</div>
+                  <div style={{fontSize:11,color:'var(--text-3)',marginBottom:8}}>{new Date(inv.soldAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})} · {inv.soldBy}</div>
+                  <div style={{display:'flex',flexWrap:'wrap',gap:4,marginBottom:8}}>{inv.lines.slice(0,3).map((l,i)=><span key={i} className="tag" style={{fontSize:11}}>{l.productName} ×{l.quantity}</span>)}{inv.lines.length>3&&<span style={{fontSize:11,color:'var(--text-3)'}}>+{inv.lines.length-3} more</span>}</div>
+                  <div style={{display:'flex',gap:6,justifyContent:'flex-end',borderTop:'1px solid var(--border)',paddingTop:8}}>
+                    <button className="btn-icon" onClick={e=>{e.stopPropagation();handlePrint(inv)}}>🖨 Print</button>
+                    <button className="btn-icon danger" onClick={e=>{e.stopPropagation();setDeleteTarget(inv)}}>✕</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            )}
 
           
           {selInvoice && (

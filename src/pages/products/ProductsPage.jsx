@@ -3,6 +3,7 @@ import AppLayout from '../../components/layout/AppLayout'
 import ProductFormModal from './ProductFormModal'
 import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import Pagination from '../../components/ui/Pagination'
+import ViewToggle from '../../components/ui/ViewToggle'
 import ExportMenu from '../../components/ui/ExportMenu'
 import ImportExcelModal from '../../components/ui/ImportExcelModal'
 import { getProducts, deleteProduct, createProduct } from '../../api/productApi'
@@ -34,6 +35,7 @@ export default function ProductsPage() {
   const [currentPage,  setCurrentPage]  = useState(0)
   const [sortBy,       setSortBy]       = useState('name')
   const [sortDir,      setSortDir]      = useState('asc')
+  const [view,         setView]         = useState('table')
   const [showAdd,      setShowAdd]      = useState(false)
   const [editTarget,   setEditTarget]   = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
@@ -122,6 +124,7 @@ export default function ProductsPage() {
 
       
       <div className="toolbar">
+        <ViewToggle view={view} onChange={setView} />
         <div className="search-wrap">
           <span className="search-icon" style={{ fontSize:13 }}>⌕</span>
           <input className="search-input" placeholder="Search products or SKU…"
@@ -149,77 +152,72 @@ export default function ProductsPage() {
       </div>
 
       
-      <div className="table-wrap">
-        {loading ? (
-          <div style={{ padding:52, textAlign:'center' }}>
-            <span className="spinner" style={{ width:24, height:24, borderWidth:2.5 }} />
-            <div style={{ color:'var(--muted)', fontFamily:'var(--mono)', fontSize:11, marginTop:10 }}>Loading products…</div>
-          </div>
-        ) : products.length === 0 ? (
-          <div className="empty-state">
-            <span className="empty-icon">⬡</span>
-            <strong>{hasFilters ? 'No products match your filters.' : 'No products yet.'}</strong>
-            <span style={{ fontSize:12 }}>{hasFilters ? 'Try clearing filters.' : 'Click "+ Add Product" to get started.'}</span>
-          </div>
-        ) : (
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th className="hide-mobile">ID</th>
-                <th className="sort" onClick={() => handleSort('name')}>Name <SA col="name" /></th>
-                <th>Category</th>
-                <th className="sort" onClick={() => handleSort('quantity')}>Qty <SA col="quantity" /></th>
-                <th className="sort" onClick={() => handleSort('price')}>Price <SA col="price" /></th>
-                <th className="hide-mobile">Cost</th>
-                <th className="hide-mobile">SKU</th>
-                <th className="hide-mobile">Reorder</th>
-                <th>Status</th>
-                <th style={{ textAlign:'right' }}>Actions</th>
-              </tr>
-            </thead>
+      {loading ? (
+        <div style={{ padding:52, textAlign:'center' }}>
+          <span className="spinner" style={{ width:24, height:24, borderWidth:2.5 }} />
+        </div>
+      ) : products.length === 0 ? (
+        <div className="empty-state">
+          <span className="empty-icon">⬡</span>
+          <strong>{hasFilters ? 'No products match your filters.' : 'No products yet.'}</strong>
+        </div>
+      ) : view === 'table' ? (
+        <div className="table-wrap">
+          <table className="data-table" style={{ minWidth:600 }}>
+            <thead><tr>
+              <th>Name</th><th>Category</th><th>Qty</th><th>Price</th><th>Cost</th><th>SKU</th><th>Status</th><th style={{ textAlign:'right' }}>Actions</th>
+            </tr></thead>
             <tbody>
               {products.map(p => (
                 <tr key={p.id}>
-                  <td className="mono muted">{p.id}</td>
-                  <td>
-                    <div style={{ fontWeight:500 }}>{p.name}</div>
-                    {p.description && (
-                      <div style={{ color:'var(--muted)', fontSize:11, marginTop:1, maxWidth:200, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
-                        {p.description}
-                      </div>
-                    )}
-                  </td>
+                  <td><div style={{ fontWeight:500 }}>{p.name}</div>{p.description && <div style={{ color:'var(--muted)', fontSize:11 }}>{p.description}</div>}</td>
                   <td><span className="tag">{p.categoryName}</span></td>
-                  <td className="mono" style={{ color:p.quantity===0?'var(--red)':p.quantity<=p.reorderLevel?'var(--amber)':'inherit' }}>
-                    {p.quantity}
-                  </td>
+                  <td className="mono" style={{ color:p.quantity===0?'var(--red)':p.quantity<=p.reorderLevel?'var(--amber)':'inherit' }}>{p.quantity}</td>
                   <td className="mono">₹{Number(p.price).toLocaleString('en-IN',{minimumFractionDigits:2})}</td>
                   <td className="mono muted">₹{Number(p.costPrice||0).toLocaleString('en-IN',{minimumFractionDigits:2})}</td>
-                  <td className="hide-mobile">{p.sku ? <span className="tag" style={{ fontFamily:'var(--mono)', fontSize:10 }}>{p.sku}</span> : <span className="muted">—</span>}</td>
-                  <td className="mono muted">{p.reorderLevel}</td>
-                  <td className="hide-mobile"><StockBadge qty={p.quantity} level={p.reorderLevel} /></td>
-                  <td>
-                    <div style={{ display:'flex', gap:6, justifyContent:'flex-end' }}>
-                      
-                      <button className="btn-icon" title="Edit" style={{ color:'var(--blue)' }}
-                        onClick={() => setEditTarget(p)}>
-                        ✎
-                      </button>
-                      
-                      {isAdmin && (
-                        <button className="btn-icon danger" title="Delete"
-                          onClick={() => setDeleteTarget(p)}>
-                          ✕
-                        </button>
-                      )}
-                    </div>
-                  </td>
+                  <td className="mono" style={{ fontSize:11 }}>{p.sku || '—'}</td>
+                  <td><StockBadge qty={p.quantity} level={p.reorderLevel} /></td>
+                  <td><div style={{ display:'flex', gap:6, justifyContent:'flex-end' }}>
+                    <button className="btn-icon" style={{ color:'var(--blue)' }} onClick={() => setEditTarget(p)}>✎</button>
+                    {isAdmin && <button className="btn-icon danger" onClick={() => setDeleteTarget(p)}>✕</button>}
+                  </div></td>
                 </tr>
               ))}
             </tbody>
           </table>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))', gap:12 }}>
+          {products.map(p => (
+            <div key={p.id} className="card" style={{ padding:14 }}>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:8 }}>
+                <div>
+                  <div style={{ fontWeight:600, fontSize:13, color:'var(--text)' }}>{p.name}</div>
+                  <span className="tag" style={{ marginTop:3, display:'inline-block' }}>{p.categoryName}</span>
+                </div>
+                <StockBadge qty={p.quantity} level={p.reorderLevel} />
+              </div>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:6, marginBottom:10 }}>
+                {[
+                  { label:'Qty', value:p.quantity, color:p.quantity===0?'var(--red)':p.quantity<=p.reorderLevel?'var(--amber)':'var(--text)' },
+                  { label:'Price', value:`₹${Number(p.price).toLocaleString('en-IN')}` },
+                  { label:'Cost', value:`₹${Number(p.costPrice||0).toLocaleString('en-IN')}` },
+                  { label:'SKU', value:p.sku||'—' },
+                ].map(r => (
+                  <div key={r.label} style={{ background:'var(--raised)', borderRadius:6, padding:'6px 8px' }}>
+                    <div style={{ fontSize:10, color:'var(--text-3)', marginBottom:2 }}>{r.label}</div>
+                    <div style={{ fontSize:12, fontFamily:'var(--mono)', fontWeight:500, color:r.color||'var(--text)' }}>{r.value}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ display:'flex', gap:6, justifyContent:'flex-end', borderTop:'1px solid var(--border)', paddingTop:8 }}>
+                <button className="btn-icon" style={{ color:'var(--blue)' }} onClick={() => setEditTarget(p)}>✎ Edit</button>
+                {isAdmin && <button className="btn-icon danger" onClick={() => setDeleteTarget(p)}>✕</button>}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       
       {!loading && products.length > 0 && (

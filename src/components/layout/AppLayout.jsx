@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import ChatWidget from '../ui/ChatWidget'
-
+ 
 const NAV = [
   { to:'/home',           label:'Home',       icon:'🏠' },
   { to:'/sales',          label:'Sales',      icon:'📄' },
@@ -14,22 +14,22 @@ const NAV = [
   { to:'/stock/balance',  label:'Balance',    icon:'⚖'  },
   { to:'/database',       label:'DB',         icon:'⊞'  },
 ]
-
+ 
 function UserMenu({ user, isAdmin, logout }) {
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
   const navigate = useNavigate()
-
+ 
   useEffect(() => {
     const h = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
     document.addEventListener('mousedown', h)
     return () => document.removeEventListener('mousedown', h)
   }, [])
-
+ 
   const avatar = user?.profilePic
     ? <img src={user.profilePic} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
     : user?.username?.[0]?.toUpperCase()
-
+ 
   return (
     <div ref={ref} style={{ position:'relative' }}>
       <div className="avatar" onClick={() => setOpen(o => !o)} title="Account">{avatar}</div>
@@ -74,14 +74,14 @@ function UserMenu({ user, isAdmin, logout }) {
     </div>
   )
 }
-
+ 
 function MobileDrawer({ open, onClose, user, isAdmin, logout }) {
   const navigate = useNavigate()
   const location = useLocation()
   const ref = useRef(null)
-
+ 
   useEffect(() => { onClose() }, [location.pathname])
-
+ 
   useEffect(() => {
     if (!open) return
     const h = e => { if (ref.current && !ref.current.contains(e.target)) onClose() }
@@ -92,12 +92,12 @@ function MobileDrawer({ open, onClose, user, isAdmin, logout }) {
       document.removeEventListener('touchstart', h, { passive: true })
     }
   }, [open])
-
+ 
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
   }, [open])
-
+ 
   return (
     <>
       <div className={`mobile-drawer-backdrop${open ? ' open' : ''}`} onClick={onClose} />
@@ -111,7 +111,7 @@ function MobileDrawer({ open, onClose, user, isAdmin, logout }) {
           </NavLink>
           <button className="mobile-drawer-close" onClick={onClose} aria-label="Close menu">✕</button>
         </div>
-
+ 
         <div className="mobile-drawer-user">
           <div style={{ width:38, height:38, borderRadius:'50%', overflow:'hidden', background:'var(--accent-dim)', border:'1px solid var(--accent-border)', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--accent)', fontFamily:'var(--mono)', fontSize:14, fontWeight:600, flexShrink:0 }}>
             {user?.profilePic ? <img src={user.profilePic} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} /> : user?.username?.[0]?.toUpperCase()}
@@ -121,7 +121,7 @@ function MobileDrawer({ open, onClose, user, isAdmin, logout }) {
             <div style={{ color:'var(--text-3)', fontSize:11, fontFamily:'var(--mono)' }}>{user?.email}</div>
           </div>
         </div>
-
+ 
         <nav className="mobile-drawer-nav">
           {NAV.map(n => (
             <NavLink
@@ -134,7 +134,7 @@ function MobileDrawer({ open, onClose, user, isAdmin, logout }) {
             </NavLink>
           ))}
         </nav>
-
+ 
         <div className="mobile-drawer-footer">
           <button className="mobile-drawer-action" onClick={() => { navigate('/settings'); onClose() }}>
             <span>⚙</span> Settings
@@ -153,33 +153,33 @@ function MobileDrawer({ open, onClose, user, isAdmin, logout }) {
     </>
   )
 }
-
+ 
 export default function AppLayout({ children, title }) {
   const { user, isAdmin, logout } = useAuth()
   const [scrolled, setScrolled] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
-
+ 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 20)
     window.addEventListener('scroll', fn, { passive: true })
     return () => window.removeEventListener('scroll', fn)
   }, [])
-
+ 
   const triggerPalette = () => window.dispatchEvent(new KeyboardEvent('keydown', { key:'k', ctrlKey:true, bubbles:true }))
-
+ 
   return (
     <div className="app-layout">
-
+ 
       <div className={`topnav-wrap${scrolled ? ' scrolled' : ''}`}>
         <nav className="topnav">
-
+ 
           <NavLink to="/dashboard" className="topnav-logo">
             <div className="topnav-logo-mark">
               <img src="/logo.png" alt="InventOS" style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:7 }} />
             </div>
             <span className="topnav-logo-text">InventOS</span>
           </NavLink>
-
+ 
           <div className="topnav-links">
             {NAV.map(n => (
               <NavLink key={n.to} to={n.to} className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
@@ -188,20 +188,20 @@ export default function AppLayout({ children, title }) {
               </NavLink>
             ))}
           </div>
-
+ 
           <div className="topnav-right">
             <button onClick={triggerPalette} className="search-btn" aria-label="Search">
               <span style={{ fontSize:12 }}>⌕</span>
               <span className="search-btn-label">Search</span>
               <kbd className="search-kbd">⌘K</kbd>
             </button>
-
+ 
             <span className="topnav-date">
               {new Date().toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })}
             </span>
-
+ 
             <UserMenu user={user} isAdmin={isAdmin} logout={logout} />
-
+ 
             <button
               className="hamburger"
               onClick={() => setDrawerOpen(true)}
@@ -212,7 +212,7 @@ export default function AppLayout({ children, title }) {
           </div>
         </nav>
       </div>
-
+ 
       <MobileDrawer
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
@@ -220,7 +220,7 @@ export default function AppLayout({ children, title }) {
         isAdmin={isAdmin}
         logout={logout}
       />
-
+ 
       <main className="page-content">{children}</main>
       <ChatWidget />
     </div>

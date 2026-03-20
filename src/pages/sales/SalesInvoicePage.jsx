@@ -533,7 +533,7 @@ export default function SalesInvoicePage() {
       <div className="page-header">
         <div>
           <div className="page-title">Sales Invoice</div>
-          <div className="page-sub">Create and manage customer invoices · Number series: INV-XXXX</div>
+          
         </div>
         <div style={{ display:'flex', gap:8, alignItems:'center' }}>
           {view==='list' && (

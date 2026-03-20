@@ -455,7 +455,8 @@ export default function SalesInvoicePage() {
   const toast  = useToast()
   const { user } = useAuth()
 
-  const [view,         setView]         = useState('list')  
+  const [view,         setView]         = useState('list')
+  const [tableView,    setTableView]    = useState('table')
   const [products,     setProducts]     = useState([])
   const [sales,        setSales]        = useState([])
   const [loading,      setLoading]      = useState(true)
@@ -574,7 +575,7 @@ export default function SalesInvoicePage() {
           <div>
             
             <div style={{ marginBottom:12, display:'flex', gap:8, alignItems:'center', flexWrap:'wrap' }}>
-              <ViewToggle view={view} onChange={setView} />
+              <ViewToggle view={tableView} onChange={setTableView} />
               <div className="search-wrap" style={{ flex:1 }}>
                 <span className="search-icon">⌕</span>
                 <input className="search-input" placeholder="Search by invoice number, customer, or product…"
@@ -582,7 +583,7 @@ export default function SalesInvoicePage() {
               </div>
             </div>
 
-            {view === 'table' ? (
+            {tableView === 'table' ? (
             <div className="table-wrap">
               <table className="data-table" style={{minWidth:580}}>
                 <thead><tr>

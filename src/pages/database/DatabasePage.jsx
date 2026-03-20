@@ -168,11 +168,11 @@ export default function DatabasePage() {
   const [prodSearch,  setProdSearch]  = useState('')
 
   // Suppliers
-  const [purchases,     setPurchases]    = useState([])
-  const [suppLoading,   setSuppLoading]  = useState(false)
-  const [suppSearch,    setSuppSearch]   = useState('')
-  const [suppModal,     setSuppModal]    = useState(null)  // { name, newName }
-  const [suppSaving,    setSuppSaving]   = useState(false)
+  const [purchases,    setPurchases]   = useState([])
+  const [suppLoading,  setSuppLoading] = useState(false)
+  const [suppSearch,   setSuppSearch]  = useState('')
+  const [suppModal,    setSuppModal]   = useState(null)
+  const [suppSaving,   setSuppSaving]  = useState(false)
 
   const loadCategories = useCallback(async () => {
     setCatLoading(true)
@@ -194,7 +194,7 @@ export default function DatabasePage() {
   useEffect(() => {
     if (tab !== 'suppliers') return
     setSuppLoading(true)
-    getPurchases().then(data => setPurchases(Array.isArray(data) ? data : [])).catch(() => {}).finally(() => setSuppLoading(false))
+    getPurchases().then(d => setPurchases(Array.isArray(d) ? d : [])).catch(()=>{}).finally(()=>setSuppLoading(false))
   }, [tab])
 
   const handleCatDelete = async () => {
@@ -211,35 +211,42 @@ export default function DatabasePage() {
     finally { setProdDeleting(false) }
   }
 
-  // Derive supplier list from purchases
-  const supplierMap = {}
+  // Derive suppliers from purchases + manually added ones
+  const manualSupps = (() => { try { return JSON.parse(localStorage.getItem('inv_suppliers')||'[]') } catch { return [] } })()
+  const suppMap = {}
+  manualSupps.forEach(n => { if (!suppMap[n]) suppMap[n] = { name:n, orders:0, totalSpent:0, products:new Set(), lastOrder:null } })
   purchases.forEach(p => {
     const k = p.supplierName || 'Unknown'
-    if (!supplierMap[k]) supplierMap[k] = { name:k, orders:0, totalSpent:0, products:new Set(), lastOrder:null }
-    supplierMap[k].orders++
-    supplierMap[k].totalSpent += Number(p.totalCost) || 0
-    supplierMap[k].products.add(p.productName)
+    if (!suppMap[k]) suppMap[k] = { name:k, orders:0, totalSpent:0, products:new Set(), lastOrder:null }
+    suppMap[k].orders++
+    suppMap[k].totalSpent += Number(p.totalCost)||0
+    suppMap[k].products.add(p.productName)
     const d = new Date(p.purchasedAt)
-    if (!supplierMap[k].lastOrder || d > new Date(supplierMap[k].lastOrder)) supplierMap[k].lastOrder = p.purchasedAt
+    if (!suppMap[k].lastOrder || d > new Date(suppMap[k].lastOrder)) suppMap[k].lastOrder = p.purchasedAt
   })
-  const suppliers = Object.values(supplierMap)
-    .map(s => ({ ...s, products: s.products.size }))
-    .sort((a,b) => b.totalSpent - a.totalSpent)
-  const filteredSuppliers = suppSearch
-    ? suppliers.filter(s => s.name.toLowerCase().includes(suppSearch.toLowerCase()))
-    : suppliers
+  const suppliers = Object.values(suppMap).map(s=>({...s, products:s.products.size})).sort((a,b)=>b.totalSpent-a.totalSpent)
+  const filteredSuppliers = suppSearch ? suppliers.filter(s=>s.name.toLowerCase().includes(suppSearch.toLowerCase())) : suppliers
 
-  const handleRenameSupplier = async () => {
+  const handleSaveSupplier = async () => {
     if (!suppModal?.newName?.trim()) return
     setSuppSaving(true)
     try {
-      // Update all purchases with old supplier name
-      const toUpdate = purchases.filter(p => p.supplierName === suppModal.name)
-      await Promise.all(toUpdate.map(p => updatePurchase(p.id, { ...p, supplierName: suppModal.newName.trim() })))
+      if (suppModal.mode === 'edit' && suppModal.name !== suppModal.newName.trim()) {
+        const toUpdate = purchases.filter(p => p.supplierName === suppModal.name)
+        await Promise.all(toUpdate.map(p => updatePurchase(p.id, {...p, supplierName: suppModal.newName.trim()})))
+        // update localStorage manual list too
+        const stored = JSON.parse(localStorage.getItem('inv_suppliers')||'[]')
+        const idx = stored.indexOf(suppModal.name)
+        if (idx !== -1) { stored[idx] = suppModal.newName.trim(); localStorage.setItem('inv_suppliers', JSON.stringify(stored)) }
+      }
+      if (suppModal.mode === 'add') {
+        const stored = JSON.parse(localStorage.getItem('inv_suppliers')||'[]')
+        if (!stored.includes(suppModal.newName.trim())) { stored.push(suppModal.newName.trim()); localStorage.setItem('inv_suppliers', JSON.stringify(stored)) }
+      }
       setSuppModal(null)
       setSuppLoading(true)
-      getPurchases().then(data => setPurchases(Array.isArray(data) ? data : [])).finally(() => setSuppLoading(false))
-    } catch { } finally { setSuppSaving(false) }
+      getPurchases().then(d => setPurchases(Array.isArray(d)?d:[])).finally(()=>setSuppLoading(false))
+    } catch {} finally { setSuppSaving(false) }
   }
 
   const filteredProducts = products.filter(p =>
@@ -425,35 +432,57 @@ export default function DatabasePage() {
           <div className="toolbar">
             <div className="search-wrap">
               <span className="search-icon" style={{ fontSize:13 }}>⌕</span>
-              <input className="search-input" placeholder="Search suppliers…" value={suppSearch} onChange={e => setSuppSearch(e.target.value)} />
+              <input className="search-input" placeholder="Search suppliers…" value={suppSearch} onChange={e=>setSuppSearch(e.target.value)} />
             </div>
             <ViewToggle view={view} onChange={setView} />
+            {isAdmin && (
+              <button className="btn btn-primary" style={{ marginLeft:'auto' }}
+                onClick={()=>setSuppModal({ mode:'add', name:'', newName:'' })}>
+                + Add Supplier
+              </button>
+            )}
           </div>
 
           {suppLoading ? (
             <div style={{ padding:40, textAlign:'center' }}><span className="spinner" style={{ width:22, height:22 }} /></div>
           ) : filteredSuppliers.length === 0 ? (
-            <div className="empty-state"><span className="empty-icon">🏭</span><strong>No suppliers found.</strong><span style={{ fontSize:12 }}>Suppliers are derived from purchase orders.</span></div>
+            <div className="empty-state">
+              <span className="empty-icon">🏭</span>
+              <strong>No suppliers yet.</strong>
+              <span style={{ fontSize:12 }}>{isAdmin ? 'Add a supplier or create a purchase order.' : 'No suppliers found.'}</span>
+            </div>
           ) : view === 'table' ? (
             <div className="table-wrap">
               <table className="data-table" style={{ minWidth:560 }}>
                 <thead><tr>
-                  <th>Supplier Name</th><th>Orders</th><th>Products Supplied</th>
-                  <th style={{ textAlign:'right' }}>Total Spent</th><th>Last Order</th>
+                  <th>Supplier Name</th>
+                  <th style={{ textAlign:'right' }}>Orders</th>
+                  <th style={{ textAlign:'right' }}>Products</th>
+                  <th style={{ textAlign:'right' }}>Total Spent</th>
+                  <th>Last Order</th>
                   {isAdmin && <th style={{ textAlign:'right' }}>Actions</th>}
                 </tr></thead>
-                <tbody>{filteredSuppliers.map(s => (
-                  <tr key={s.name}>
-                    <td style={{ fontWeight:500 }}>{s.name}</td>
-                    <td className="mono">{s.orders}</td>
-                    <td className="mono">{s.products}</td>
-                    <td className="mono" style={{ textAlign:'right', fontWeight:600, color:'var(--teal)' }}>₹{s.totalSpent.toLocaleString('en-IN',{minimumFractionDigits:2})}</td>
-                    <td className="mono muted" style={{ fontSize:11 }}>{s.lastOrder ? new Date(s.lastOrder).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '—'}</td>
-                    {isAdmin && <td><div style={{ display:'flex', gap:6, justifyContent:'flex-end' }}>
-                      <button className="btn-icon" style={{ color:'var(--blue)' }} onClick={() => setSuppModal({ name:s.name, newName:s.name })}>✎</button>
-                    </div></td>}
-                  </tr>
-                ))}</tbody>
+                <tbody>
+                  {filteredSuppliers.map(s => (
+                    <tr key={s.name}>
+                      <td style={{ fontWeight:500 }}>{s.name}</td>
+                      <td className="mono" style={{ textAlign:'right' }}>{s.orders}</td>
+                      <td className="mono" style={{ textAlign:'right' }}>{s.products}</td>
+                      <td className="mono" style={{ textAlign:'right', fontWeight:600, color:'var(--teal)' }}>
+                        {s.orders > 0 ? `₹${s.totalSpent.toLocaleString('en-IN',{minimumFractionDigits:2})}` : '—'}
+                      </td>
+                      <td className="mono muted" style={{ fontSize:11 }}>
+                        {s.lastOrder ? new Date(s.lastOrder).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '—'}
+                      </td>
+                      {isAdmin && (
+                        <td><div style={{ display:'flex', gap:6, justifyContent:'flex-end' }}>
+                          <button className="btn-icon" style={{ color:'var(--blue)' }}
+                            onClick={()=>setSuppModal({ mode:'edit', name:s.name, newName:s.name })}>✎</button>
+                        </div></td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
               </table>
             </div>
           ) : (
@@ -462,14 +491,17 @@ export default function DatabasePage() {
                 <div key={s.name} className="card" style={{ padding:14 }}>
                   <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:10 }}>
                     <div style={{ fontWeight:600, fontSize:14 }}>{s.name}</div>
-                    {isAdmin && <button className="btn-icon" style={{ color:'var(--blue)' }} onClick={() => setSuppModal({ name:s.name, newName:s.name })}>✎</button>}
+                    {isAdmin && (
+                      <button className="btn-icon" style={{ color:'var(--blue)' }}
+                        onClick={()=>setSuppModal({ mode:'edit', name:s.name, newName:s.name })}>✎</button>
+                    )}
                   </div>
                   <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:6 }}>
                     {[
-                      { label:'Orders', value:s.orders },
-                      { label:'Products', value:s.products },
-                      { label:'Total Spent', value:`₹${s.totalSpent.toLocaleString('en-IN')}`, color:'var(--teal)' },
-                      { label:'Last Order', value:s.lastOrder ? new Date(s.lastOrder).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : '—' },
+                      { label:'Orders',      value: s.orders > 0 ? s.orders : '—' },
+                      { label:'Products',    value: s.products > 0 ? s.products : '—' },
+                      { label:'Total Spent', value: s.orders > 0 ? `₹${s.totalSpent.toLocaleString('en-IN')}` : '—', color:'var(--teal)' },
+                      { label:'Last Order',  value: s.lastOrder ? new Date(s.lastOrder).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : '—' },
                     ].map(r => (
                       <div key={r.label} style={{ background:'var(--raised)', borderRadius:6, padding:'6px 8px' }}>
                         <div style={{ fontSize:10, color:'var(--text-3)', marginBottom:2 }}>{r.label}</div>
@@ -485,26 +517,36 @@ export default function DatabasePage() {
       )}
 
       {suppModal && (
-        <Modal title="Rename Supplier" onClose={() => setSuppModal(null)}
+        <Modal
+          title={suppModal.mode === 'add' ? 'Add Supplier' : 'Edit Supplier'}
+          onClose={()=>setSuppModal(null)}
           footer={<>
-            <button className="btn btn-ghost" onClick={() => setSuppModal(null)} disabled={suppSaving}>Cancel</button>
-            <button className="btn btn-success" onClick={handleRenameSupplier} disabled={suppSaving || !suppModal.newName?.trim()}>
-              {suppSaving ? <span className="spinner" /> : null}
-              {suppSaving ? 'Saving…' : 'Rename Supplier'}
+            <button className="btn btn-ghost" onClick={()=>setSuppModal(null)} disabled={suppSaving}>Cancel</button>
+            <button className="btn btn-success" onClick={handleSaveSupplier} disabled={suppSaving || !suppModal.newName?.trim()}>
+              {suppSaving ? <><span className="spinner" /> Saving…</> : suppModal.mode === 'add' ? 'Add Supplier' : 'Save Changes'}
             </button>
           </>}>
-          <div style={{ marginBottom:12, fontSize:13, color:'var(--text-2)' }}>
-            Renaming will update all purchase orders from <strong style={{ color:'var(--text)' }}>{suppModal.name}</strong>.
-          </div>
+          {suppModal.mode === 'edit' && (
+            <div style={{ marginBottom:12, padding:'10px 12px', background:'var(--raised)', borderRadius:8, fontSize:13, color:'var(--text-2)' }}>
+              Renaming <strong style={{ color:'var(--text)' }}>{suppModal.name}</strong> will update all {purchases.filter(p=>p.supplierName===suppModal.name).length} purchase orders.
+            </div>
+          )}
+          {suppModal.mode === 'add' && (
+            <div style={{ marginBottom:12, padding:'10px 12px', background:'var(--accent-dim)', borderRadius:8, fontSize:13, color:'var(--text-2)' }}>
+              New supplier will appear in purchase order forms immediately.
+            </div>
+          )}
           <div className="field">
-            <label>New Supplier Name</label>
-            <input autoFocus type="text" value={suppModal.newName}
-              onChange={e => setSuppModal(s => ({ ...s, newName: e.target.value }))}
-              onKeyDown={e => e.key === 'Enter' && handleRenameSupplier()} />
+            <label>Supplier Name *</label>
+            <input autoFocus type="text" placeholder="e.g. TechMart India"
+              value={suppModal.newName}
+              onChange={e=>setSuppModal(s=>({...s, newName:e.target.value}))}
+              onKeyDown={e=>e.key==='Enter' && handleSaveSupplier()} />
           </div>
         </Modal>
       )}
 
+      
       {catModal && (
         <CategoryModal cat={catModal === 'add' ? null : catModal}
           onClose={() => setCatModal(null)} onSaved={loadCategories} />

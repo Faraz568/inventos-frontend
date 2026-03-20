@@ -175,18 +175,29 @@ export default function SettingsPage() {
     })
   }
 
-  const changePassword = async () => {
+  const changePassword = () => {
     if (!curPwd)               { toast.error('Enter your current password.'); return }
     if (newPwd.length < 6)     { toast.error('New password must be at least 6 characters.'); return }
     if (newPwd !== confPwd)    { toast.error('Passwords do not match.'); return }
-    setSavingPwd(true)
-    try {
-      if (DEMO_MODE) { await new Promise(r => setTimeout(r, 600)) }
-      else await api.put('/users/me/password', { currentPassword: curPwd, newPassword: newPwd })
-      toast.success('Password changed successfully.')
-      setCurPwd(''); setNewPwd(''); setConfPwd('')
-    } catch (err) { toast.error(err.response?.data?.message || 'Password change failed') }
-    finally { setSavingPwd(false) }
+    // Send OTP to user's email, then confirm before changing
+    const otp = makeOtp()
+    if (!DEMO_MODE) {
+      api.post('/auth/send-otp', { email: user?.email }).catch(() => {})
+    }
+    setOtpTarget({
+      email: user?.email,
+      otp,
+      onVerified: async () => {
+        setSavingPwd(true)
+        try {
+          if (DEMO_MODE) { await new Promise(r => setTimeout(r, 600)) }
+          else await api.put('/users/me/password', { currentPassword: curPwd, newPassword: newPwd })
+          toast.success('Password changed successfully.')
+          setCurPwd(''); setNewPwd(''); setConfPwd('')
+        } catch (err) { toast.error(err.response?.data?.message || 'Password change failed') }
+        finally { setSavingPwd(false) }
+      }
+    })
   }
 
   const tabs = [

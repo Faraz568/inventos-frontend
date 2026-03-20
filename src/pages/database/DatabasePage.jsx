@@ -6,11 +6,13 @@ import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import { useToast } from '../../context/ToastContext'
 import { getCategories, createCategory, updateCategory, deleteCategory } from '../../api/categoryApi'
 import { getProducts, createProduct, updateProduct, deleteProduct } from '../../api/productApi'
+import { getPurchases, updatePurchase } from '../../api/purchaseApi'
 import { useAuth } from '../../context/AuthContext'
 
 const TABS = [
   { key:'categories', label:'Categories' },
   { key:'products',   label:'Products'   },
+  { key:'suppliers',  label:'Suppliers'  },
 ]
 
 function CategoryModal({ cat, onClose, onSaved }) {
@@ -165,6 +167,13 @@ export default function DatabasePage() {
   const [prodDeleting,setProdDeleting]= useState(false)
   const [prodSearch,  setProdSearch]  = useState('')
 
+  // Suppliers
+  const [purchases,     setPurchases]    = useState([])
+  const [suppLoading,   setSuppLoading]  = useState(false)
+  const [suppSearch,    setSuppSearch]   = useState('')
+  const [suppModal,     setSuppModal]    = useState(null)  // { name, newName }
+  const [suppSaving,    setSuppSaving]   = useState(false)
+
   const loadCategories = useCallback(async () => {
     setCatLoading(true)
     try { setCategories(await getCategories()) } catch { toast.error('Failed to load categories') }
@@ -182,6 +191,11 @@ export default function DatabasePage() {
 
   useEffect(() => { loadCategories() }, [loadCategories])
   useEffect(() => { if (tab === 'products') loadProducts() }, [tab, loadProducts])
+  useEffect(() => {
+    if (tab !== 'suppliers') return
+    setSuppLoading(true)
+    getPurchases().then(data => setPurchases(Array.isArray(data) ? data : [])).catch(() => {}).finally(() => setSuppLoading(false))
+  }, [tab])
 
   const handleCatDelete = async () => {
     setCatDeleting(true)
@@ -195,6 +209,37 @@ export default function DatabasePage() {
     try { await deleteProduct(prodDelete.id); toast.success(`"${prodDelete.name}" deleted.`); setProdDelete(null); loadProducts() }
     catch (err) { toast.error(err.response?.data?.message || 'Delete failed') }
     finally { setProdDeleting(false) }
+  }
+
+  // Derive supplier list from purchases
+  const supplierMap = {}
+  purchases.forEach(p => {
+    const k = p.supplierName || 'Unknown'
+    if (!supplierMap[k]) supplierMap[k] = { name:k, orders:0, totalSpent:0, products:new Set(), lastOrder:null }
+    supplierMap[k].orders++
+    supplierMap[k].totalSpent += Number(p.totalCost) || 0
+    supplierMap[k].products.add(p.productName)
+    const d = new Date(p.purchasedAt)
+    if (!supplierMap[k].lastOrder || d > new Date(supplierMap[k].lastOrder)) supplierMap[k].lastOrder = p.purchasedAt
+  })
+  const suppliers = Object.values(supplierMap)
+    .map(s => ({ ...s, products: s.products.size }))
+    .sort((a,b) => b.totalSpent - a.totalSpent)
+  const filteredSuppliers = suppSearch
+    ? suppliers.filter(s => s.name.toLowerCase().includes(suppSearch.toLowerCase()))
+    : suppliers
+
+  const handleRenameSupplier = async () => {
+    if (!suppModal?.newName?.trim()) return
+    setSuppSaving(true)
+    try {
+      // Update all purchases with old supplier name
+      const toUpdate = purchases.filter(p => p.supplierName === suppModal.name)
+      await Promise.all(toUpdate.map(p => updatePurchase(p.id, { ...p, supplierName: suppModal.newName.trim() })))
+      setSuppModal(null)
+      setSuppLoading(true)
+      getPurchases().then(data => setPurchases(Array.isArray(data) ? data : [])).finally(() => setSuppLoading(false))
+    } catch { } finally { setSuppSaving(false) }
   }
 
   const filteredProducts = products.filter(p =>
@@ -221,6 +266,7 @@ export default function DatabasePage() {
             {t.label}
             {t.key === 'categories' && <span style={{ marginLeft:6, background:'var(--blue-dim)', color:'var(--blue)', borderRadius:10, fontSize:10, padding:'1px 6px', fontFamily:'var(--mono)' }}>{categories.length}</span>}
             {t.key === 'products'   && <span style={{ marginLeft:6, background:'var(--blue-dim)', color:'var(--blue)', borderRadius:10, fontSize:10, padding:'1px 6px', fontFamily:'var(--mono)' }}>{products.length}</span>}
+          {t.key === 'suppliers'  && <span style={{ marginLeft:6, background:'var(--blue-dim)', color:'var(--blue)', borderRadius:10, fontSize:10, padding:'1px 6px', fontFamily:'var(--mono)' }}>{suppliers.length}</span>}
           </button>
         ))}
       </div>
@@ -373,7 +419,92 @@ export default function DatabasePage() {
         </>
       )}
 
-      
+
+      {tab === 'suppliers' && (
+        <>
+          <div className="toolbar">
+            <div className="search-wrap">
+              <span className="search-icon" style={{ fontSize:13 }}>⌕</span>
+              <input className="search-input" placeholder="Search suppliers…" value={suppSearch} onChange={e => setSuppSearch(e.target.value)} />
+            </div>
+            <ViewToggle view={view} onChange={setView} />
+          </div>
+
+          {suppLoading ? (
+            <div style={{ padding:40, textAlign:'center' }}><span className="spinner" style={{ width:22, height:22 }} /></div>
+          ) : filteredSuppliers.length === 0 ? (
+            <div className="empty-state"><span className="empty-icon">🏭</span><strong>No suppliers found.</strong><span style={{ fontSize:12 }}>Suppliers are derived from purchase orders.</span></div>
+          ) : view === 'table' ? (
+            <div className="table-wrap">
+              <table className="data-table" style={{ minWidth:560 }}>
+                <thead><tr>
+                  <th>Supplier Name</th><th>Orders</th><th>Products Supplied</th>
+                  <th style={{ textAlign:'right' }}>Total Spent</th><th>Last Order</th>
+                  {isAdmin && <th style={{ textAlign:'right' }}>Actions</th>}
+                </tr></thead>
+                <tbody>{filteredSuppliers.map(s => (
+                  <tr key={s.name}>
+                    <td style={{ fontWeight:500 }}>{s.name}</td>
+                    <td className="mono">{s.orders}</td>
+                    <td className="mono">{s.products}</td>
+                    <td className="mono" style={{ textAlign:'right', fontWeight:600, color:'var(--teal)' }}>₹{s.totalSpent.toLocaleString('en-IN',{minimumFractionDigits:2})}</td>
+                    <td className="mono muted" style={{ fontSize:11 }}>{s.lastOrder ? new Date(s.lastOrder).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '—'}</td>
+                    {isAdmin && <td><div style={{ display:'flex', gap:6, justifyContent:'flex-end' }}>
+                      <button className="btn-icon" style={{ color:'var(--blue)' }} onClick={() => setSuppModal({ name:s.name, newName:s.name })}>✎</button>
+                    </div></td>}
+                  </tr>
+                ))}</tbody>
+              </table>
+            </div>
+          ) : (
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(240px,1fr))', gap:12 }}>
+              {filteredSuppliers.map(s => (
+                <div key={s.name} className="card" style={{ padding:14 }}>
+                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:10 }}>
+                    <div style={{ fontWeight:600, fontSize:14 }}>{s.name}</div>
+                    {isAdmin && <button className="btn-icon" style={{ color:'var(--blue)' }} onClick={() => setSuppModal({ name:s.name, newName:s.name })}>✎</button>}
+                  </div>
+                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:6 }}>
+                    {[
+                      { label:'Orders', value:s.orders },
+                      { label:'Products', value:s.products },
+                      { label:'Total Spent', value:`₹${s.totalSpent.toLocaleString('en-IN')}`, color:'var(--teal)' },
+                      { label:'Last Order', value:s.lastOrder ? new Date(s.lastOrder).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : '—' },
+                    ].map(r => (
+                      <div key={r.label} style={{ background:'var(--raised)', borderRadius:6, padding:'6px 8px' }}>
+                        <div style={{ fontSize:10, color:'var(--text-3)', marginBottom:2 }}>{r.label}</div>
+                        <div style={{ fontSize:12, fontFamily:'var(--mono)', fontWeight:500, color:r.color||'var(--text)' }}>{r.value}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      {suppModal && (
+        <Modal title="Rename Supplier" onClose={() => setSuppModal(null)}
+          footer={<>
+            <button className="btn btn-ghost" onClick={() => setSuppModal(null)} disabled={suppSaving}>Cancel</button>
+            <button className="btn btn-success" onClick={handleRenameSupplier} disabled={suppSaving || !suppModal.newName?.trim()}>
+              {suppSaving ? <span className="spinner" /> : null}
+              {suppSaving ? 'Saving…' : 'Rename Supplier'}
+            </button>
+          </>}>
+          <div style={{ marginBottom:12, fontSize:13, color:'var(--text-2)' }}>
+            Renaming will update all purchase orders from <strong style={{ color:'var(--text)' }}>{suppModal.name}</strong>.
+          </div>
+          <div className="field">
+            <label>New Supplier Name</label>
+            <input autoFocus type="text" value={suppModal.newName}
+              onChange={e => setSuppModal(s => ({ ...s, newName: e.target.value }))}
+              onKeyDown={e => e.key === 'Enter' && handleRenameSupplier()} />
+          </div>
+        </Modal>
+      )}
+
       {catModal && (
         <CategoryModal cat={catModal === 'add' ? null : catModal}
           onClose={() => setCatModal(null)} onSaved={loadCategories} />

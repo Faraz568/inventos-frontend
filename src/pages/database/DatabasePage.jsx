@@ -237,71 +237,67 @@ export default function DatabasePage() {
             )}
           </div>
 
-          <div className="table-wrap">
-            {catLoading
-              ? <div style={{ padding:40, textAlign:'center' }}><span className="spinner" style={{ width:22, height:22 }} /></div>
-              : <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th className="hide-mobile">ID</th>
-                      <th>Name</th>
-                      <th className="hide-mobile">Description</th>
-                      <th className="hide-mobile">Created</th>
-                      <th>Products</th>
-                      {isAdmin && <th style={{ textAlign:'right' }}>Actions</th>}
+          {catLoading ? (
+            <div style={{ padding:40, textAlign:'center' }}><span className="spinner" style={{ width:22, height:22 }} /></div>
+          ) : view === 'table' ? (
+            <div className="table-wrap">
+              <table className="data-table" style={{ minWidth:480 }}>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Created</th>
+                    <th>Products</th>
+                    {isAdmin && <th style={{ textAlign:'right' }}>Actions</th>}
+                  </tr>
+                </thead>
+                <tbody>
+                  {categories.map(c => (
+                    <tr key={c.id}>
+                      <td><div style={{ fontWeight:500 }}>{c.name}</div></td>
+                      <td style={{ color:'var(--muted)', fontSize:12 }}>{c.description || '—'}</td>
+                      <td className="mono muted" style={{ fontSize:11 }}>{c.createdAt ? new Date(c.createdAt).toLocaleDateString('en-IN') : '—'}</td>
+                      <td>
+                        <span style={{ background:'var(--blue-dim)', color:'var(--blue)', borderRadius:4, fontSize:11, fontFamily:'var(--mono)', padding:'2px 8px' }}>
+                          {products.filter(p => p.categoryId === c.id || p.categoryName === c.name).length} items
+                        </span>
+                      </td>
+                      {isAdmin && (
+                        <td>
+                          <div style={{ display:'flex', gap:6, justifyContent:'flex-end' }}>
+                            <button className="btn-icon" style={{ color:'var(--blue)' }} onClick={() => setCatModal(c)}>✎</button>
+                            <button className="btn-icon danger" onClick={() => setCatDelete(c)}>✕</button>
+                          </div>
+                        </td>
+                      )}
                     </tr>
-                  </thead>
-                  <tbody>
-                    {categories.map(c => (
-                      <tr key={c.id}>
-                        <td className="mono muted">{c.id}</td>
-                        <td>
-                          <div style={{ fontWeight:500 }}>{c.name}</div>
-                        </td>
-                        <td style={{ color:'var(--muted)', fontSize:12 }}>{c.description || '—'}</td>
-                        <td className="mono muted" style={{ fontSize:11 }}>
-                          {c.createdAt ? new Date(c.createdAt).toLocaleDateString('en-IN') : '—'}
-                        </td>
-                        <td>
-                          <span style={{ background:'var(--blue-dim)', color:'var(--blue)', borderRadius:4, fontSize:11, fontFamily:'var(--mono)', padding:'2px 8px' }}>
-                            {products.filter(p => p.categoryId === c.id || p.categoryName === c.name).length} items
-                          </span>
-                        </td>
-                        {isAdmin && (
-                          <td>
-                            <div style={{ display:'flex', gap:6, justifyContent:'flex-end' }}>
-                              <button className="btn-icon" style={{ color:'var(--blue)' }} onClick={() => setCatModal(c)}>✎</button>
-                              <button className="btn-icon danger" onClick={() => setCatDelete(c)}>✕</button>
-                            </div>
-                          </td>
-                        )}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-            }
-          </div>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           ) : (
-          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(220px,1fr))',gap:12}}>
-            {categories.map(c2 => {
-              const prodCount = products.filter(p => p.categoryId === c2.id || p.categoryName === c2.name).length
-              return (
-              <div key={c2.id} className="card" style={{padding:14}}>
-                <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:8}}>
-                  <div style={{fontWeight:600,fontSize:13}}>{c2.name}</div>
-                  <span style={{background:'var(--accent-dim)',color:'var(--accent)',borderRadius:4,fontSize:11,fontFamily:'var(--mono)',padding:'2px 8px'}}>{prodCount} items</span>
-                </div>
-                {c2.description && <div style={{fontSize:12,color:'var(--text-3)',marginBottom:8}}>{c2.description}</div>}
-                {c2.createdAt && <div style={{fontSize:10,color:'var(--text-3)',fontFamily:'var(--mono)',marginBottom:8}}>{new Date(c2.createdAt).toLocaleDateString('en-IN')}</div>}
-                {isAdmin && <div style={{display:'flex',gap:6,justifyContent:'flex-end',borderTop:'1px solid var(--border)',paddingTop:8}}>
-                  <button className="btn-icon" style={{color:'var(--blue)'}} onClick={() => setCatModal(c2)}>✎ Edit</button>
-                  <button className="btn-icon danger" onClick={() => setCatDelete(c2)}>✕</button>
-                </div>}
-              </div>
-            )})}
-          </div>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(220px,1fr))', gap:12 }}>
+              {categories.map(c => {
+                const prodCount = products.filter(p => p.categoryId === c.id || p.categoryName === c.name).length
+                return (
+                  <div key={c.id} className="card" style={{ padding:14 }}>
+                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:8 }}>
+                      <div style={{ fontWeight:600, fontSize:13 }}>{c.name}</div>
+                      <span style={{ background:'var(--accent-dim)', color:'var(--accent)', borderRadius:4, fontSize:11, fontFamily:'var(--mono)', padding:'2px 8px' }}>{prodCount} items</span>
+                    </div>
+                    {c.description && <div style={{ fontSize:12, color:'var(--text-3)', marginBottom:8 }}>{c.description}</div>}
+                    {c.createdAt && <div style={{ fontSize:10, color:'var(--text-3)', fontFamily:'var(--mono)', marginBottom:8 }}>{new Date(c.createdAt).toLocaleDateString('en-IN')}</div>}
+                    {isAdmin && (
+                      <div style={{ display:'flex', gap:6, justifyContent:'flex-end', borderTop:'1px solid var(--border)', paddingTop:8 }}>
+                        <button className="btn-icon" style={{ color:'var(--blue)' }} onClick={() => setCatModal(c)}>✎ Edit</button>
+                        <button className="btn-icon danger" onClick={() => setCatDelete(c)}>✕</button>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
           )}
-        </>
       )}
 
       
@@ -320,51 +316,88 @@ export default function DatabasePage() {
             )}
           </div>
 
-          {view === 'table' ? (
-          <div className="table-wrap">
-            {prodLoading
-              ? <div style={{ padding:40, textAlign:'center' }}><span className="spinner" style={{ width:22, height:22 }} /></div>
-              : <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th className="hide-mobile">ID</th><th>Name</th><th>Category</th><th>Qty</th>
-                      <th>Price ₹</th><th>Cost ₹</th><th>SKU</th><th>Reorder</th><th>Status</th>
-                      {isAdmin && <th style={{ textAlign:'right' }}>Actions</th>}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredProducts.length === 0
-                      ? <tr><td colSpan={10} style={{ textAlign:'center', padding:32, color:'var(--muted)' }}>No products found.</td></tr>
-                      : filteredProducts.map(p => (
-                        <tr key={p.id}>
-                          <td className="mono muted">{p.id}</td>
-                          <td style={{ fontWeight:500 }}>
-                            {p.name}
-                            {p.description && <div style={{ color:'var(--muted)', fontSize:11, marginTop:1, maxWidth:180, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{p.description}</div>}
+          {prodLoading ? (
+            <div style={{ padding:40, textAlign:'center' }}><span className="spinner" style={{ width:22, height:22 }} /></div>
+          ) : view === 'table' ? (
+            <>
+            <div className="table-wrap">
+              <table className="data-table" style={{ minWidth:640 }}>
+                <thead><tr>
+                  <th>Name</th><th>Category</th><th>Qty</th>
+                  <th>Price ₹</th><th>Cost ₹</th><th>SKU</th><th>Status</th>
+                  {isAdmin && <th style={{ textAlign:'right' }}>Actions</th>}
+                </tr></thead>
+                <tbody>
+                  {filteredProducts.length === 0
+                    ? <tr><td colSpan={8} style={{ textAlign:'center', padding:32, color:'var(--muted)' }}>No products found.</td></tr>
+                    : filteredProducts.map(p => (
+                      <tr key={p.id}>
+                        <td style={{ fontWeight:500 }}>
+                          {p.name}
+                          {p.description && <div style={{ color:'var(--muted)', fontSize:11, marginTop:1, maxWidth:180, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{p.description}</div>}
+                        </td>
+                        <td><span className="tag">{p.categoryName}</span></td>
+                        <td className="mono" style={{ color: p.quantity===0?'var(--red)':p.quantity<=p.reorderLevel?'var(--amber)':'inherit' }}>{p.quantity}</td>
+                        <td className="mono">₹{Number(p.price).toLocaleString('en-IN',{minimumFractionDigits:2})}</td>
+                        <td className="mono muted">₹{Number(p.costPrice||0).toLocaleString('en-IN',{minimumFractionDigits:2})}</td>
+                        <td className="mono" style={{ fontSize:11, color:'var(--muted)' }}>{p.sku || '—'}</td>
+                        <td>{stockBadge(p.quantity, p.reorderLevel)}</td>
+                        {isAdmin && (
+                          <td>
+                            <div style={{ display:'flex', gap:6, justifyContent:'flex-end' }}>
+                              <button className="btn-icon" style={{ color:'var(--blue)' }} onClick={() => { loadCategories(); setProdModal(p) }}>✎</button>
+                              <button className="btn-icon danger" onClick={() => setProdDelete(p)}>✕</button>
+                            </div>
                           </td>
-                          <td><span className="tag">{p.categoryName}</span></td>
-                          <td className="mono" style={{ color: p.quantity===0?'var(--red)':p.quantity<=p.reorderLevel?'var(--amber)':'inherit' }}>{p.quantity}</td>
-                          <td className="mono">₹{Number(p.price).toLocaleString('en-IN',{minimumFractionDigits:2})}</td>
-                          <td className="mono muted">₹{Number(p.costPrice||0).toLocaleString('en-IN',{minimumFractionDigits:2})}</td>
-                          <td className="mono" style={{ fontSize:11, color:'var(--muted)' }}>{p.sku || '—'}</td>
-                          <td className="mono muted">{p.reorderLevel}</td>
-                          <td>{stockBadge(p.quantity, p.reorderLevel)}</td>
-                          {isAdmin && (
-                            <td>
-                              <div style={{ display:'flex', gap:6, justifyContent:'flex-end' }}>
-                                <button className="btn-icon" style={{ color:'var(--blue)' }} onClick={() => { loadCategories(); setProdModal(p) }}>✎</button>
-                                <button className="btn-icon danger" onClick={() => setProdDelete(p)}>✕</button>
-                              </div>
-                            </td>
-                          )}
-                        </tr>
-                      ))
-                    }
-                  </tbody>
-                </table>
-            }
-          </div>
-          <div className="page-count">{filteredProducts.length} of {products.length} products</div>
+                        )}
+                      </tr>
+                    ))
+                  }
+                </tbody>
+              </table>
+            </div>
+            <div className="page-count">{filteredProducts.length} of {products.length} products</div>
+            </>
+          ) : (
+            <>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(240px,1fr))', gap:12 }}>
+              {filteredProducts.length === 0
+                ? <div className="empty-state" style={{ gridColumn:'1/-1' }}><span>No products found.</span></div>
+                : filteredProducts.map(p => (
+                  <div key={p.id} className="card" style={{ padding:14 }}>
+                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:8 }}>
+                      <div>
+                        <div style={{ fontWeight:600, fontSize:13 }}>{p.name}</div>
+                        {p.description && <div style={{ fontSize:11, color:'var(--text-3)', marginTop:2 }}>{p.description}</div>}
+                      </div>
+                      <span className="tag">{p.categoryName}</span>
+                    </div>
+                    <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:5, marginBottom:isAdmin ? 10 : 0 }}>
+                      {[
+                        { label:'Qty', value:p.quantity, color:p.quantity===0?'var(--red)':p.quantity<=p.reorderLevel?'var(--amber)':'var(--text)' },
+                        { label:'Price', value:`₹${Number(p.price).toLocaleString('en-IN')}` },
+                        { label:'Cost', value:`₹${Number(p.costPrice||0).toLocaleString('en-IN')}` },
+                        { label:'SKU', value:p.sku||'—' },
+                      ].map(r => (
+                        <div key={r.label} style={{ background:'var(--raised)', borderRadius:6, padding:'5px 8px' }}>
+                          <div style={{ fontSize:10, color:'var(--text-3)', marginBottom:1 }}>{r.label}</div>
+                          <div style={{ fontSize:12, fontFamily:'var(--mono)', fontWeight:500, color:r.color||'var(--text)' }}>{r.value}</div>
+                        </div>
+                      ))}
+                    </div>
+                    {isAdmin && (
+                      <div style={{ display:'flex', gap:6, justifyContent:'flex-end', borderTop:'1px solid var(--border)', paddingTop:8 }}>
+                        <button className="btn-icon" style={{ color:'var(--blue)' }} onClick={() => { loadCategories(); setProdModal(p) }}>✎ Edit</button>
+                        <button className="btn-icon danger" onClick={() => setProdDelete(p)}>✕</button>
+                      </div>
+                    )}
+                  </div>
+                ))
+              }
+            </div>
+            <div className="page-count">{filteredProducts.length} of {products.length} products</div>
+            </>
+          )}
         </>
       )}
 

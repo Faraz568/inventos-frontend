@@ -453,7 +453,7 @@ export default function ChatWidget() {
 
       {/* Chat panel */}
       {open && (
-        <div style={{
+        <div className="chat-panel" style={{
           position:'fixed', bottom:84, right:24, zIndex:399,
           width:380, maxWidth:'calc(100vw - 48px)',
           height:540, maxHeight:'calc(100vh - 120px)',

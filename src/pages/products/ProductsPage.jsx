@@ -108,7 +108,7 @@ export default function ProductsPage() {
 
       
       <div className="page-header">
-        <div style={{ display:'flex', justifyContent:'space-between', flexWrap:'wrap', gap:8, alignItems:'flex-start', flexWrap:'wrap', gap:8 }}>
+        <div style={{ display:'flex', justifyContent:'space-between', flexWrap:'wrap', gap:8, alignItems:'flex-start' }}>
           <div>
             <div className="page-title">Products</div>
             <div className="page-sub">{pageInfo.totalElements} items in inventory</div>

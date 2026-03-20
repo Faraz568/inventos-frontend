@@ -247,7 +247,7 @@ export default function StockBalancePage() {
           const margin = Number(p.price)>0?((Number(p.price)-(p.avgCost))/Number(p.price)*100).toFixed(1):0
           return (
             <div style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, overflow:'hidden', position:'sticky', top:80 }}>
-              <div style={{ padding:'12px 16px', borderBottom:'1px solid var(--border)', background:'var(--raised)', display:'flex', justifyContent:'space-between', flexWrap:'wrap', gap:8, alignItems:'center', flexWrap:'wrap', gap:8 }}>
+              <div style={{ padding:'12px 16px', borderBottom:'1px solid var(--border)', background:'var(--raised)', display:'flex', justifyContent:'space-between', flexWrap:'wrap', gap:8, alignItems:'center' }}>
                 <span style={{ fontWeight:600, fontSize:13 }}>Product Detail</span>
                 <button onClick={()=>setSelected(null)} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--text-3)', fontSize:16 }}>✕</button>
               </div>

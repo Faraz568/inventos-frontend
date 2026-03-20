@@ -8,7 +8,15 @@ import { getPurchases, createPurchase, updatePurchase, deletePurchase } from '..
 import { exportPurchases } from '../../utils/exportUtils'
 import { getProducts } from '../../api/productApi'
 
-const SUPPLIERS = ['TechMart India','Office Supplies Co','Display World','Furniture Hub','General Traders','Other']
+// Load suppliers from localStorage (set by DB > Suppliers tab) merged with defaults
+function getSupplierList() {
+  const defaults = ['TechMart India','Office Supplies Co','Display World','Furniture Hub','General Traders']
+  try {
+    const stored = JSON.parse(localStorage.getItem('inv_suppliers') || '[]')
+    const merged = [...new Set([...stored, ...defaults])]
+    return merged.sort()
+  } catch { return defaults }
+}
 const STATUSES  = [{ value:'received', label:'Received' },{ value:'pending', label:'Pending' },{ value:'cancelled', label:'Cancelled' }]
 const today     = () => new Date().toISOString().slice(0,10)
 
@@ -270,10 +278,23 @@ function PurchaseModal({ purchase, products, onClose, onSaved }) {
         <div className="field-row">
           <div className="field">
             <label>Supplier Name *</label>
-            <input list="sup-list" type="text" placeholder="e.g. TechMart India"
-              value={meta.supplierName} onChange={setM('supplierName')}
-              style={errors.supplierName ? { borderColor:'var(--red)' } : {}} />
-            <datalist id="sup-list">{SUPPLIERS.map(s => <option key={s} value={s} />)}</datalist>
+            <select
+              value={getSupplierList().includes(meta.supplierName) ? meta.supplierName : (meta.supplierName ? '__other__' : '')}
+              onChange={e => {
+                if (e.target.value === '__other__') setM('supplierName')({ target: { value: '' } })
+                else setM('supplierName')({ target: { value: e.target.value } })
+              }}
+              style={{ background:'#ffffff', color:'#0f1117', borderColor: errors.supplierName ? 'var(--red)' : 'var(--border-md)', borderRadius:'var(--r)', padding:'8px 11px', fontSize:13, fontFamily:'var(--font)', width:'100%', outline:'none' }}>
+              <option value="">— Select supplier —</option>
+              {getSupplierList().map(s => <option key={s} value={s}>{s}</option>)}
+              <option value="__other__">Other (type manually)</option>
+            </select>
+            {(!getSupplierList().includes(meta.supplierName) && meta.supplierName !== '') || meta.supplierName === '' && (
+              <input type="text" placeholder="Enter supplier name…"
+                value={meta.supplierName}
+                onChange={setM('supplierName')}
+                style={{ marginTop:6, ...(errors.supplierName ? { borderColor:'var(--red)' } : {}) }} />
+            )}
             <Err k="supplierName" />
           </div>
           <div className="field">

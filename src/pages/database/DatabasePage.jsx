@@ -173,6 +173,7 @@ export default function DatabasePage() {
   const [suppSearch,   setSuppSearch]  = useState('')
   const [suppModal,    setSuppModal]   = useState(null)
   const [suppSaving,   setSuppSaving]  = useState(false)
+  const [suppDelete,   setSuppDelete]   = useState(null)   // supplier name to delete
 
   const loadCategories = useCallback(async () => {
     setCatLoading(true)
@@ -244,6 +245,20 @@ export default function DatabasePage() {
         if (!stored.includes(suppModal.newName.trim())) { stored.push(suppModal.newName.trim()); localStorage.setItem('inv_suppliers', JSON.stringify(stored)) }
       }
       setSuppModal(null)
+      setSuppLoading(true)
+      getPurchases().then(d => setPurchases(Array.isArray(d)?d:[])).finally(()=>setSuppLoading(false))
+    } catch {} finally { setSuppSaving(false) }
+  }
+
+  const handleDeleteSupplier = async () => {
+    if (!suppDelete) return
+    setSuppSaving(true)
+    try {
+      // Remove from localStorage manual list
+      const stored = JSON.parse(localStorage.getItem('inv_suppliers')||'[]')
+      localStorage.setItem('inv_suppliers', JSON.stringify(stored.filter(n => n !== suppDelete)))
+      setSuppDelete(null)
+      // Refresh supplier list
       setSuppLoading(true)
       getPurchases().then(d => setPurchases(Array.isArray(d)?d:[])).finally(()=>setSuppLoading(false))
     } catch {} finally { setSuppSaving(false) }
@@ -478,6 +493,10 @@ export default function DatabasePage() {
                         <td><div style={{ display:'flex', gap:6, justifyContent:'flex-end' }}>
                           <button className="btn-icon" style={{ color:'var(--blue)' }}
                             onClick={()=>setSuppModal({ mode:'edit', name:s.name, newName:s.name })}>✎</button>
+                          {s.orders === 0 && (
+                            <button className="btn-icon danger"
+                              onClick={()=>setSuppDelete(s.name)}>✕</button>
+                          )}
                         </div></td>
                       )}
                     </tr>
@@ -492,8 +511,13 @@ export default function DatabasePage() {
                   <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:10 }}>
                     <div style={{ fontWeight:600, fontSize:14 }}>{s.name}</div>
                     {isAdmin && (
-                      <button className="btn-icon" style={{ color:'var(--blue)' }}
-                        onClick={()=>setSuppModal({ mode:'edit', name:s.name, newName:s.name })}>✎</button>
+                      <div style={{ display:'flex', gap:6 }}>
+                        <button className="btn-icon" style={{ color:'var(--blue)' }}
+                          onClick={()=>setSuppModal({ mode:'edit', name:s.name, newName:s.name })}>✎</button>
+                        {s.orders === 0 && (
+                          <button className="btn-icon danger" onClick={()=>setSuppDelete(s.name)}>✕</button>
+                        )}
+                      </div>
                     )}
                   </div>
                   <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:6 }}>
@@ -544,6 +568,17 @@ export default function DatabasePage() {
               onKeyDown={e=>e.key==='Enter' && handleSaveSupplier()} />
           </div>
         </Modal>
+      )}
+
+      {suppDelete && (
+        <ConfirmDialog
+          title="Delete Supplier"
+          message={<>Remove <strong style={{ color:'var(--text)' }}>{suppDelete}</strong> from the supplier list? This only removes them from the directory — existing purchase orders are not affected.</>}
+          onConfirm={handleDeleteSupplier}
+          onCancel={()=>setSuppDelete(null)}
+          danger
+          loading={suppSaving}
+        />
       )}
 
       

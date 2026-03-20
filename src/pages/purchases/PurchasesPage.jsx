@@ -292,7 +292,7 @@ function PurchaseModal({ purchase, products, onClose, onSaved }) {
 
         {/* Product lines */}
         <div>
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
+          <div style={{ display:'flex', justifyContent:'space-between', flexWrap:'wrap', gap:8, alignItems:'center', flexWrap:'wrap', gap:8, marginBottom:8 }}>
             <label style={{ fontSize:12, fontWeight:600, color:'var(--text-2)', textTransform:'uppercase', letterSpacing:'.05em' }}>
               Products ({lines.length})
             </label>
@@ -331,7 +331,7 @@ function PurchaseModal({ purchase, products, onClose, onSaved }) {
 
         {/* Subtotal */}
         {subtotal > 0 && (
-          <div style={{ background:'var(--teal-dim)', border:'1px solid rgba(20,184,166,.2)', borderRadius:'var(--r)', padding:'10px 14px', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+          <div style={{ background:'var(--teal-dim)', border:'1px solid rgba(20,184,166,.2)', borderRadius:'var(--r)', padding:'10px 14px', display:'flex', justifyContent:'space-between', flexWrap:'wrap', gap:8, alignItems:'center', flexWrap:'wrap', gap:8 }}>
             <span style={{ color:'var(--muted)', fontSize:12 }}>Total Purchase Cost ({lines.length} item{lines.length>1?'s':''})</span>
             <span style={{ color:'var(--teal)', fontFamily:'var(--mono)', fontSize:18, fontWeight:500 }}>
               ₹{subtotal.toLocaleString('en-IN',{minimumFractionDigits:2})}
@@ -544,7 +544,7 @@ export default function PurchasesPage() {
       </div>
 
       {!loading && (
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginTop:12 }}>
+        <div style={{ display:'flex', justifyContent:'space-between', flexWrap:'wrap', gap:8, alignItems:'center', flexWrap:'wrap', gap:8, marginTop:12 }}>
           <div className="page-count" style={{ margin:0 }}>{filtered.length} of {purchases.length} purchases</div>
           <ExportBtn
             disabled={purchases.length === 0}

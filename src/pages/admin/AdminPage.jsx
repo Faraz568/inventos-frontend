@@ -96,7 +96,7 @@ export default function AdminPage() {
       </div>
 
       <div className="card" style={{ overflow:'hidden' }}>
-        <div style={{ alignItems:'center', borderBottom:'1px solid var(--border)', display:'flex', justifyContent:'space-between', padding:'14px 18px' }}>
+        <div style={{ alignItems:'center', borderBottom:'1px solid var(--border)', display:'flex', justifyContent:'space-between', flexWrap:'wrap', gap:8, padding:'14px 18px' }}>
           <span style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--text-2)', letterSpacing:'.1em', textTransform:'uppercase' }}>
             User Accounts ({users.length})
           </span>

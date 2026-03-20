@@ -300,7 +300,7 @@ html, body, #root {
 /* ══════════════════════════════════════════════════
    TABLE
 ══════════════════════════════════════════════════ */
-.table-wrap { border: 1px solid var(--border); border-radius: var(--rxl); overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.04); }
+.table-wrap { border: 1px solid var(--border); border-radius: var(--rxl); overflow-x: auto; overflow-y: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.04); -webkit-overflow-scrolling: touch; }
 .data-table { border-collapse: collapse; width: 100%; }
 .data-table thead { background: var(--raised); }
 .data-table th {
@@ -527,12 +527,14 @@ html, body, #root {
 /* ══════════════════════════════════════════════════
    TABS
 ══════════════════════════════════════════════════ */
-.tab-bar { border-bottom: 1px solid var(--border); display: flex; gap: 0; margin-bottom: 16px; }
+.tab-bar { border-bottom: 1px solid var(--border); display: flex; gap: 0; margin-bottom: 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; flex-shrink: 0; }
+.tab-bar::-webkit-scrollbar { display: none; }
 .tab-btn {
   background: transparent; border: none; border-bottom: 2px solid transparent;
   color: var(--text-2); cursor: pointer; font-family: var(--font); font-size: 13px;
   font-weight: 500; margin-bottom: -1px; padding: 8px 16px;
   transition: color var(--t), border-color var(--t);
+  white-space: nowrap; flex-shrink: 0;
 }
 .tab-btn:hover { color: var(--text); }
 .tab-btn.active { border-bottom-color: var(--accent); color: var(--accent); }
@@ -799,4 +801,90 @@ html, body, #root {
 .grid-single { display: block !important; }
 @media (max-width: 768px) {
   .grid-3 { grid-template-columns: 1fr; }
+}
+
+/* ══════════════════════════════════════════════════
+   GLOBAL MOBILE OVERRIDES
+══════════════════════════════════════════════════ */
+
+/* Prevent any element from overflowing the viewport */
+* { max-width: 100%; box-sizing: border-box; }
+img, svg { max-width: 100%; }
+
+@media (max-width: 768px) {
+
+  /* ── Page header: stack title and actions ── */
+  .page-header {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .page-header > div,
+  .page-header > span {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* ── Toolbar: wrap buttons ── */
+  .toolbar {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .toolbar input,
+  .toolbar select {
+    min-width: 0;
+    flex: 1 1 140px;
+  }
+
+  /* ── Cards ── */
+  .card { border-radius: 10px; }
+  .stat-card { padding: 14px 16px; }
+  .stat-value { font-size: 22px; }
+
+  /* ── Tables: scroll horizontally, don't clip ── */
+  .table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 10px;
+  }
+  .data-table { min-width: 520px; }
+  .data-table th, .data-table td {
+    padding: 9px 10px;
+    font-size: 12px;
+  }
+
+  /* ── Buttons ── */
+  .btn { font-size: 12px; padding: 6px 11px; }
+  .btn-sm { font-size: 11px; padding: 4px 8px; }
+
+  /* ── Modals ── */
+  .modal-overlay { align-items: flex-end; padding: 0; }
+  .modal-box {
+    border-radius: 16px 16px 0 0 !important;
+    max-height: 92vh;
+    overflow-y: auto;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+
+  /* ── Hide columns on small screens ── */
+  .hide-mobile { display: none !important; }
+
+  /* ── Form field rows stack ── */
+  .field-row { grid-template-columns: 1fr !important; }
+
+  /* ── Split layout ── */
+  .split-layout { grid-template-columns: 1fr !important; }
+
+  /* ── Pagination ── */
+  .pagination { flex-wrap: wrap; justify-content: center; gap: 4px; }
+}
+
+@media (max-width: 480px) {
+  .page-content { padding: 68px 10px 32px; }
+  .stat-value { font-size: 20px; }
+  .data-table th, .data-table td { padding: 8px 8px; font-size: 11.5px; }
+  .btn { font-size: 11.5px; padding: 5px 9px; }
 }

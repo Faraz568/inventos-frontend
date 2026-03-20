@@ -53,7 +53,7 @@ function CategoryModal({ category, onClose, onSaved }) {
           <input type="text" autoFocus placeholder="e.g. Electronics"
             value={form.name} onChange={set('name')}
             style={errors.name ? { borderColor:'var(--red)' } : {}} />
-          <div style={{ display:'flex', justifyContent:'space-between' }}>
+          <div style={{ display:'flex', justifyContent:'space-between', flexWrap:'wrap', gap:8 }}>
             <Err k="name" />
             <span style={{ color:'var(--muted)', fontSize:11, marginLeft:'auto' }}>{form.name.length}/80</span>
           </div>
@@ -63,7 +63,7 @@ function CategoryModal({ category, onClose, onSaved }) {
           <textarea rows={3} placeholder="Optional description…"
             value={form.description} onChange={set('description')}
             style={errors.description ? { borderColor:'var(--red)' } : {}} />
-          <div style={{ display:'flex', justifyContent:'space-between' }}>
+          <div style={{ display:'flex', justifyContent:'space-between', flexWrap:'wrap', gap:8 }}>
             <Err k="description" />
             <span style={{ color:'var(--muted)', fontSize:11, marginLeft:'auto' }}>{form.description.length}/255</span>
           </div>
@@ -118,7 +118,7 @@ export default function CategoriesPage() {
   return (
     <AppLayout title="Categories">
       <div className="page-header">
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-end' }}>
+        <div style={{ display:'flex', justifyContent:'space-between', flexWrap:'wrap', gap:8, alignItems:'flex-start', flexWrap:'wrap', gap:8 }}>
           <div>
             <div className="page-title">Category Management</div>
             <div className="page-sub">Organise products into categories</div>
@@ -187,7 +187,7 @@ export default function CategoriesPage() {
               onMouseLeave={e => e.currentTarget.style.borderColor='var(--border)'}
             >
               
-              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:8 }}>
+              <div style={{ display:'flex', justifyContent:'space-between', flexWrap:'wrap', gap:8, alignItems:'flex-start', flexWrap:'wrap', gap:8, gap:8 }}>
                 <div style={{ display:'flex', alignItems:'center', gap:10, minWidth:0 }}>
                   <div style={{
                     width:10, height:10, borderRadius:'50%', flexShrink:0,
@@ -216,7 +216,7 @@ export default function CategoriesPage() {
 
               
               <div style={{
-                display:'flex', justifyContent:'space-between', alignItems:'center',
+                display:'flex', justifyContent:'space-between', flexWrap:'wrap', gap:8, alignItems:'center', flexWrap:'wrap', gap:8,
                 borderTop:'1px solid var(--border)', paddingTop:10, marginTop:2,
               }}>
                 <span style={{

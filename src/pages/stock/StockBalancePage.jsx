@@ -221,7 +221,7 @@ export default function StockBalancePage() {
           const margin = Number(p.price)>0?((Number(p.price)-(p.avgCost))/Number(p.price)*100).toFixed(1):0
           return (
             <div style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, overflow:'hidden', position:'sticky', top:80 }}>
-              <div style={{ padding:'12px 16px', borderBottom:'1px solid var(--border)', background:'var(--raised)', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+              <div style={{ padding:'12px 16px', borderBottom:'1px solid var(--border)', background:'var(--raised)', display:'flex', justifyContent:'space-between', flexWrap:'wrap', gap:8, alignItems:'center', flexWrap:'wrap', gap:8 }}>
                 <span style={{ fontWeight:600, fontSize:13 }}>Product Detail</span>
                 <button onClick={()=>setSelected(null)} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--text-3)', fontSize:16 }}>✕</button>
               </div>
@@ -242,7 +242,7 @@ export default function StockBalancePage() {
                   { label:'Retail Value',    value:fmt(p.retailVal), mono:true },
                   { label:'Pot. Profit',     value:fmt(p.potProfit), color:p.potProfit>=0?'var(--green)':'var(--red)', mono:true },
                 ].map(row=>(
-                  <div key={row.label} style={{ display:'flex', justifyContent:'space-between', padding:'6px 0', borderBottom:'1px solid var(--border)', alignItems:'center' }}>
+                  <div key={row.label} style={{ display:'flex', justifyContent:'space-between', flexWrap:'wrap', gap:8, padding:'6px 0', borderBottom:'1px solid var(--border)', alignItems:'center' }}>
                     <span style={{ fontSize:11.5, color:'var(--text-3)' }}>{row.label}</span>
                     <span style={{ fontSize:12.5, fontFamily:row.mono?'var(--mono)':'var(--font)', color:row.color||'var(--text)', fontWeight:500 }}>{row.value}</span>
                   </div>

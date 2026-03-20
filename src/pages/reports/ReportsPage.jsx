@@ -271,7 +271,7 @@ export default function ReportsPage() {
   return (
     <AppLayout title="Reports">
       <div className="page-header">
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
+        <div style={{ display:'flex', justifyContent:'space-between', flexWrap:'wrap', gap:8, alignItems:'flex-start', flexWrap:'wrap', gap:8 }}>
           <div>
             <div className="page-title">Reports & Analytics</div>
             <div className="page-sub">Live data from sales, purchases, and inventory</div>

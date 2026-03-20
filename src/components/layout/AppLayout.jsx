@@ -86,10 +86,10 @@ function MobileDrawer({ open, onClose, user, isAdmin, logout }) {
     if (!open) return
     const h = e => { if (ref.current && !ref.current.contains(e.target)) onClose() }
     document.addEventListener('mousedown', h)
-    document.addEventListener('touchstart', h)
+    document.addEventListener('touchstart', h, { passive: true })
     return () => {
       document.removeEventListener('mousedown', h)
-      document.removeEventListener('touchstart', h)
+      document.removeEventListener('touchstart', h, { passive: true })
     }
   }, [open])
 

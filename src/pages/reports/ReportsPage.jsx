@@ -289,7 +289,7 @@ export default function ReportsPage() {
         ))}
       </div>
 
-      <div style={{ display:'flex', justifyContent:'flex-end', gap:10, marginBottom:16, position:'relative', zIndex:1 }}>
+      <div style={{ display:'flex', justifyContent:'flex-end', flexWrap:'wrap', gap:8, marginBottom:16, position:'relative', zIndex:1 }}>
         {activeSection==='sales'     && <ExportMenu label="Export Sales"     onExport={f=>exportSales(DEMO_MODE ? [...mockSales] : liveSales, f)}/>}
         {activeSection==='purchases' && <ExportMenu label="Export Purchases" onExport={f=>exportPurchases(DEMO_MODE ? [...mockPurchases] : livePurchases, f)}/>}
         {activeSection==='inventory' && <ExportMenu label="Export Inventory" onExport={f=>exportProducts(products,f)}/>}

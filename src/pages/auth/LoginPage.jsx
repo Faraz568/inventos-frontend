@@ -262,7 +262,7 @@ export default function LoginPage({ goRegister }) {
                 onChange={set('username')} autoFocus autoComplete="username" />
             </div>
             <div className="field">
-              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:5 }}>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', marginBottom:5 }}>
                 <label style={{ margin:0 }}>Password</label>
                 <span onClick={() => setForgotStep('email')}
                   style={{ color:'var(--accent)', fontSize:12, cursor:'pointer' }}

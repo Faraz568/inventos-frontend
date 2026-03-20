@@ -277,7 +277,7 @@ export default function SettingsPage() {
           <div className="card" style={{ padding:20 }}>
             <div style={{ fontSize:13, fontWeight:500, color:'var(--text)', marginBottom:16 }}>Email Address</div>
 
-            <div style={{ background:'var(--raised)', border:'1px solid var(--border)', borderRadius:'var(--r)', padding:'10px 12px', marginBottom:16, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+            <div style={{ background:'var(--raised)', border:'1px solid var(--border)', borderRadius:'var(--r)', padding:'10px 12px', marginBottom:16, display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap' }}>
               <span style={{ color:'var(--text)', fontSize:13 }}>{email}</span>
               <span style={{ background:'var(--green-dim)', color:'var(--green)', fontSize:10, fontWeight:500, padding:'2px 8px', borderRadius:4 }}>Current</span>
             </div>

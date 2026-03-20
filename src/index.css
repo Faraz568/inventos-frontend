@@ -459,7 +459,7 @@ html, body, #root {
    TOOLBAR & SEARCH
 ══════════════════════════════════════════════════ */
 .toolbar { align-items: center; display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
-.search-wrap { position: relative; }
+.search-wrap { position: relative; flex: 1 1 180px; min-width: 0; }
 .search-icon { color: var(--text-3); left: 10px; pointer-events: none; position: absolute; top: 50%; transform: translateY(-50%); font-size: 13px; }
 .search-input {
   background: var(--surface);
@@ -472,6 +472,7 @@ html, body, #root {
   padding: 7px 11px 7px 30px;
   transition: border-color var(--t);
   width: 220px;
+  max-width: 100%;
 }
 .search-input:focus { border-color: var(--accent-border); }
 .search-input::placeholder { color: var(--text-3); }
@@ -733,158 +734,126 @@ html, body, #root {
 .mobile-drawer-action.danger:hover { background: var(--red-dim); color: var(--red); }
 
 /* ══════════════════════════════════════════════════
-   RESPONSIVE BREAKPOINTS
+   RESPONSIVE UTILITY GRID CLASSES
 ══════════════════════════════════════════════════ */
-@media (max-width: 1100px) {
-  .stats-grid { grid-template-columns: repeat(2,1fr); }
-}
-
-@media (max-width: 900px) {
-  /* hide date in navbar to save space */
-  .topnav-date { display: none; }
-}
-
-@media (max-width: 768px) {
-  /* show hamburger, hide desktop nav & search text */
-  .hamburger { display: flex; }
-  .topnav-links { display: none; }
-  .search-btn-label, .search-kbd { display: none; }
-  .search-btn { padding: 6px 8px; border-radius: 7px; }
-
-  /* show drawer backdrop */
-  .mobile-drawer-backdrop { display: block; }
-
-  /* navbar pill collapses tighter on mobile */
-  .topnav-wrap { padding: 10px 12px; }
-  .topnav { padding: 0 10px; height: 46px; }
-  .topnav-wrap.scrolled { padding: 6px 12px; }
-  .topnav-wrap.scrolled .topnav { max-width: 100%; border-radius: 12px; height: 42px; }
-
-  /* page content */
-  .page-content { padding: 72px 14px 40px; }
-
-  /* grid adjustments */
-  .stats-grid { grid-template-columns: 1fr 1fr; }
-  .split-layout { grid-template-columns: 1fr; }
-  .field-row { grid-template-columns: 1fr; }
-}
-
-@media (max-width: 480px) {
-  .stats-grid { grid-template-columns: 1fr; }
-  .page-content { padding: 68px 12px 36px; }
-  .topnav-wrap { padding: 8px 10px; }
-}
-
-/* ══════════════════════════════════════════════════
-   RESPONSIVE UTILITY CLASSES (used by pages)
-══════════════════════════════════════════════════ */
-.grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.grid-4     { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+.grid-3     { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.grid-2     { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.grid-3-col { display: grid; grid-template-columns: 1fr 1fr 240px; gap: 14px; }
 .grid-main-aside-280 { display: grid; grid-template-columns: 1fr 280px; gap: 14px; }
 .grid-main-aside-320 { display: grid; grid-template-columns: 1fr 320px; gap: 16px; }
 .grid-main-aside-260 { display: grid; grid-template-columns: 1fr 260px; gap: 16px; }
-.grid-3-col { display: grid; grid-template-columns: 1fr 1fr 240px; gap: 14px; }
-
-@media (max-width: 768px) {
-  .grid-4 { grid-template-columns: 1fr 1fr; }
-  .grid-2 { grid-template-columns: 1fr; }
-  .grid-main-aside-280 { grid-template-columns: 1fr; }
-  .grid-main-aside-320 { grid-template-columns: 1fr; }
-  .grid-main-aside-260 { grid-template-columns: 1fr; }
-  .grid-3-col { grid-template-columns: 1fr; }
-}
-
-@media (max-width: 480px) {
-  .grid-4 { grid-template-columns: 1fr; }
-}
-.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
 .grid-single { display: block !important; }
-@media (max-width: 768px) {
-  .grid-3 { grid-template-columns: 1fr; }
+
+/* ══════════════════════════════════════════════════
+   BREAKPOINT: TABLET (≤1100px)
+══════════════════════════════════════════════════ */
+@media (max-width: 1100px) {
+  .stats-grid { grid-template-columns: repeat(2,1fr); }
+  .grid-4     { grid-template-columns: repeat(2,1fr); }
 }
 
 /* ══════════════════════════════════════════════════
-   GLOBAL MOBILE OVERRIDES
+   BREAKPOINT: NARROW TABLET (≤900px)
 ══════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .topnav-date { display: none; }
+  .grid-3-col  { grid-template-columns: 1fr 1fr; }
+}
 
-/* Prevent any element from overflowing the viewport */
-* { max-width: 100%; box-sizing: border-box; }
-img, svg { max-width: 100%; }
-
+/* ══════════════════════════════════════════════════
+   BREAKPOINT: MOBILE (≤768px)
+══════════════════════════════════════════════════ */
 @media (max-width: 768px) {
 
-  /* ── Page header: stack title and actions ── */
-  .page-header {
-    display: flex;
+  /* ── Navbar ── */
+  .hamburger               { display: flex; }
+  .topnav-links            { display: none; }
+  .search-btn-label,
+  .search-kbd              { display: none; }
+  .search-btn              { padding: 6px 8px; }
+  .mobile-drawer-backdrop  { display: block; }
+  .topnav-wrap             { padding: 10px 12px; }
+  .topnav                  { padding: 0 10px; height: 46px; }
+  .topnav-wrap.scrolled    { padding: 6px 12px; }
+  .topnav-wrap.scrolled .topnav { max-width: 100%; border-radius: 12px; height: 42px; }
+
+  /* ── Page shell ── */
+  .page-content { padding: 72px 14px 40px; }
+
+  /* ── Grids collapse to single column ── */
+  .stats-grid          { grid-template-columns: 1fr 1fr; }
+  .split-layout        { grid-template-columns: 1fr !important; }
+  .field-row           { grid-template-columns: 1fr !important; }
+  .grid-4              { grid-template-columns: 1fr 1fr; }
+  .grid-3              { grid-template-columns: 1fr; }
+  .grid-2              { grid-template-columns: 1fr; }
+  .grid-3-col          { grid-template-columns: 1fr; }
+  .grid-main-aside-280 { grid-template-columns: 1fr; }
+  .grid-main-aside-320 { grid-template-columns: 1fr; }
+  .grid-main-aside-260 { grid-template-columns: 1fr; }
+
+  /* ── Toolbar: stack vertically, full width ── */
+  .toolbar {
     flex-direction: column;
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-  .page-header > div,
-  .page-header > span {
-    flex-wrap: wrap;
+    align-items: stretch;
     gap: 8px;
   }
+  .toolbar > * { width: 100%; }
+  .toolbar .btn, .toolbar button { width: auto; }
+  .toolbar .search-wrap { width: 100%; }
+  .search-input { width: 100% !important; max-width: 100% !important; }
 
-  /* ── Toolbar: wrap buttons ── */
-  .toolbar {
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-  .toolbar input,
-  .toolbar select {
-    min-width: 0;
-    flex: 1 1 140px;
-  }
+  /* ── Page header ── */
+  .page-header { margin-bottom: 16px; }
 
-  /* ── Cards ── */
-  .card { border-radius: 10px; }
-  .stat-card { padding: 14px 16px; }
+  /* ── Stat cards ── */
+  .stat-card  { padding: 14px 16px; }
   .stat-value { font-size: 22px; }
 
-  /* ── Tables: scroll horizontally, don't clip ── */
+  /* ── Tables scroll horizontally ── */
   .table-wrap {
-    overflow-x: auto;
+    overflow-x: auto !important;
     -webkit-overflow-scrolling: touch;
     border-radius: 10px;
   }
-  .data-table { min-width: 520px; }
-  .data-table th, .data-table td {
-    padding: 9px 10px;
-    font-size: 12px;
-  }
+  .data-table          { min-width: 500px; }
+  .data-table th,
+  .data-table td       { padding: 9px 10px; font-size: 12px; }
 
   /* ── Buttons ── */
-  .btn { font-size: 12px; padding: 6px 11px; }
+  .btn    { font-size: 12px; padding: 6px 11px; }
   .btn-sm { font-size: 11px; padding: 4px 8px; }
 
-  /* ── Modals ── */
-  .modal-overlay { align-items: flex-end; padding: 0; }
+  /* ── Modals slide up from bottom ── */
+  .modal-overlay { align-items: flex-end !important; padding: 0 !important; }
   .modal-box {
     border-radius: 16px 16px 0 0 !important;
-    max-height: 92vh;
-    overflow-y: auto;
+    max-height: 92vh !important;
+    overflow-y: auto !important;
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
   }
 
-  /* ── Hide columns on small screens ── */
+  /* ── Utilities ── */
   .hide-mobile { display: none !important; }
-
-  /* ── Form field rows stack ── */
-  .field-row { grid-template-columns: 1fr !important; }
-
-  /* ── Split layout ── */
-  .split-layout { grid-template-columns: 1fr !important; }
-
-  /* ── Pagination ── */
-  .pagination { flex-wrap: wrap; justify-content: center; gap: 4px; }
+  .pagination  { flex-wrap: wrap; justify-content: center; gap: 4px; }
+  .tab-bar     { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab-btn     { white-space: nowrap; flex-shrink: 0; }
 }
 
+/* ══════════════════════════════════════════════════
+   BREAKPOINT: SMALL MOBILE (≤480px)
+══════════════════════════════════════════════════ */
 @media (max-width: 480px) {
-  .page-content { padding: 68px 10px 32px; }
-  .stat-value { font-size: 20px; }
-  .data-table th, .data-table td { padding: 8px 8px; font-size: 11.5px; }
-  .btn { font-size: 11.5px; padding: 5px 9px; }
+  .page-content  { padding: 68px 10px 32px; }
+  .topnav-wrap   { padding: 8px 10px; }
+  .stats-grid    { grid-template-columns: 1fr; }
+  .grid-4        { grid-template-columns: 1fr; }
+  .stat-value    { font-size: 20px; }
+  .data-table th,
+  .data-table td { padding: 8px; font-size: 11.5px; }
+  .btn           { font-size: 11.5px; padding: 5px 9px; }
 }

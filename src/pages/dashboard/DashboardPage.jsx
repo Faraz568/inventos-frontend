@@ -179,7 +179,7 @@ function KpiCard({ label, value, sub, color, icon, onClick }) {
         boxShadow: hov&&onClick?'0 3px 14px rgba(0,0,0,.08)':'none',
       }}>
       <div style={{ position:'absolute', top:0, left:0, right:0, height:3, background:color, borderRadius:'12px 12px 0 0', opacity:.7 }}/>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', flexWrap:'wrap' }}>
         <div style={{ flex:1 }}>
           <div style={{ fontSize:10.5, fontWeight:600, color:'var(--text-3)', textTransform:'uppercase', letterSpacing:'.07em', marginBottom:7 }}>{label}</div>
           <div style={{ fontSize:24, fontWeight:700, color:'var(--text)', letterSpacing:'-.02em', lineHeight:1.2 }}>{value}</div>
@@ -385,7 +385,7 @@ export default function DashboardPage() {
               <PLBar label="Revenue"   value={revenue} max={maxPL} color="#16a05a"/>
               <PLBar label="Purchases" value={spend}   max={maxPL} color="#dc3535"/>
               <div style={{ borderTop:'1px solid var(--border)', paddingTop:12, marginTop:4 }}>
-                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: revenue>0?8:0 }}>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', marginBottom: revenue>0?8:0 }}>
                   <span style={{ fontSize:12.5, fontWeight:600 }}>Net Profit</span>
                   <span style={{ fontFamily:'var(--mono)', fontWeight:700, fontSize:13.5, color:profit>=0?'#16a05a':'#dc3535' }}>
                     {profit>=0?'▲':'▼'} {fmt(Math.abs(profit))}
@@ -424,7 +424,7 @@ export default function DashboardPage() {
                   <div style={{ fontFamily:'var(--mono)', fontSize:20, fontWeight:700, color:'var(--amber)', marginBottom:2 }}>{fmt(pendingV)}</div>
                   <div style={{ fontSize:11.5, color:'var(--text-3)', marginBottom:10 }}>awaiting delivery</div>
                   {livePurchases.filter(p=>p.status==='pending').slice(0,3).map(p=>(
-                    <div key={p.id} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'6px 0', borderBottom:'1px solid var(--border)', fontSize:12 }}>
+                    <div key={p.id} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', padding:'6px 0', borderBottom:'1px solid var(--border)', fontSize:12 }}>
                       <div>
                         <div style={{ fontWeight:500, color:'var(--text)' }}>{p.productName}</div>
                         <div style={{ color:'var(--text-3)', fontSize:10.5 }}>{p.supplierName}</div>
@@ -456,7 +456,7 @@ export default function DashboardPage() {
                   const C     = ['#4a6cf7','#16a05a','#c97c10','#7c3aed','#0891b2'][i]
                   return (
                     <div key={p.name} style={{ marginBottom: i<topProds.length-1?14:0 }}>
-                      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:5 }}>
+                      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', marginBottom:5 }}>
                         <div style={{ display:'flex', alignItems:'center', gap:9, overflow:'hidden', flex:1 }}>
                           <span style={{ width:22,height:22,borderRadius:6,background:`${C}18`,color:C,fontSize:11,fontWeight:700,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0 }}>{i+1}</span>
                           <div style={{ overflow:'hidden', flex:1 }}>

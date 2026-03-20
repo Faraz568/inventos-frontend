@@ -384,7 +384,7 @@ function InvoiceDetail({ invoice, onDelete, onPrint, onClose }) {
   const fmt = n => `₹${Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2})}`
   return (
     <div style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, overflow:'hidden', position:'sticky', top:80 }}>
-      <div style={{ padding:'13px 16px', borderBottom:'1px solid var(--border)', background:'var(--raised)', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+      <div style={{ padding:'13px 16px', borderBottom:'1px solid var(--border)', background:'var(--raised)', display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap' }}>
         <div>
           <div style={{ fontFamily:'var(--mono)', fontWeight:700, fontSize:14, color:'var(--accent)' }}>{invoice.invoiceNo}</div>
           <div style={{ fontSize:11, color:'var(--text-3)', marginTop:1 }}>
@@ -408,7 +408,7 @@ function InvoiceDetail({ invoice, onDelete, onPrint, onClose }) {
         <div style={{ marginBottom:14 }}>
           <div style={{ fontSize:10, fontWeight:600, color:'var(--text-3)', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:8 }}>Items</div>
           {invoice.lines.map((l,i)=>(
-            <div key={l.id||i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'6px 0', borderBottom:'1px solid var(--border)', fontSize:12.5 }}>
+            <div key={l.id||i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', padding:'6px 0', borderBottom:'1px solid var(--border)', fontSize:12.5 }}>
               <div style={{ flex:1, overflow:'hidden' }}>
                 <div style={{ fontWeight:500, color:'var(--text)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{l.productName}</div>
                 <div style={{ fontSize:11, color:'var(--text-3)' }}>
@@ -576,7 +576,7 @@ export default function SalesInvoicePage() {
               <div className="search-wrap">
                 <span className="search-icon">⌕</span>
                 <input className="search-input" placeholder="Search by invoice number, customer, or product…"
-                  value={search} onChange={e=>setSearch(e.target.value)} style={{ width:320 }}/>
+                  value={search} onChange={e=>setSearch(e.target.value)} style={{ width:"100%", maxWidth:320 }}/>
               </div>
             </div>
 

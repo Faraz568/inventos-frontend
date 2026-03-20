@@ -152,7 +152,7 @@ export default function StockLedgerPage() {
       </div>
 
       {/* Filters */}
-      <div style={{ display:'flex', flexWrap:'wrap', gap:10, marginBottom:14, alignItems:'center' }}>
+      <div style={{ display:'flex', flexWrap:'wrap', gap:8, marginBottom:14, alignItems:'center' }}>
         <select style={inputSt} value={productFilter} onChange={e=>setProduct(e.target.value)}>
           <option value="">All Products</option>
           {productOptions.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}

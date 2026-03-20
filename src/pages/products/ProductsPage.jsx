@@ -165,14 +165,14 @@ export default function ProductsPage() {
           <table className="data-table">
             <thead>
               <tr>
-                <th>ID</th>
+                <th className="hide-mobile">ID</th>
                 <th className="sort" onClick={() => handleSort('name')}>Name <SA col="name" /></th>
                 <th>Category</th>
                 <th className="sort" onClick={() => handleSort('quantity')}>Qty <SA col="quantity" /></th>
                 <th className="sort" onClick={() => handleSort('price')}>Price <SA col="price" /></th>
-                <th>Cost</th>
-                <th>SKU</th>
-                <th>Reorder</th>
+                <th className="hide-mobile">Cost</th>
+                <th className="hide-mobile">SKU</th>
+                <th className="hide-mobile">Reorder</th>
                 <th>Status</th>
                 <th style={{ textAlign:'right' }}>Actions</th>
               </tr>
@@ -195,9 +195,9 @@ export default function ProductsPage() {
                   </td>
                   <td className="mono">₹{Number(p.price).toLocaleString('en-IN',{minimumFractionDigits:2})}</td>
                   <td className="mono muted">₹{Number(p.costPrice||0).toLocaleString('en-IN',{minimumFractionDigits:2})}</td>
-                  <td>{p.sku ? <span className="tag" style={{ fontFamily:'var(--mono)', fontSize:10 }}>{p.sku}</span> : <span className="muted">—</span>}</td>
+                  <td className="hide-mobile">{p.sku ? <span className="tag" style={{ fontFamily:'var(--mono)', fontSize:10 }}>{p.sku}</span> : <span className="muted">—</span>}</td>
                   <td className="mono muted">{p.reorderLevel}</td>
-                  <td><StockBadge qty={p.quantity} level={p.reorderLevel} /></td>
+                  <td className="hide-mobile"><StockBadge qty={p.quantity} level={p.reorderLevel} /></td>
                   <td>
                     <div style={{ display:'flex', gap:6, justifyContent:'flex-end' }}>
                       

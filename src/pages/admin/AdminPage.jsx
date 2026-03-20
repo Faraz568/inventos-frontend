@@ -106,7 +106,7 @@ export default function AdminPage() {
           ? <div style={{ padding:40, textAlign:'center' }}><span className="spinner" style={{ width:22, height:22 }} /></div>
           : <table className="data-table">
               <thead>
-                <tr><th>ID</th><th>Username</th><th>Full Name</th><th>Email</th><th>Role</th><th>Status</th><th>Created</th><th style={{ textAlign:'right' }}>Actions</th></tr>
+                <tr><th className="hide-mobile">ID</th><th>Username</th><th>Full Name</th><th>Email</th><th>Role</th><th className="hide-mobile">Status</th><th className="hide-mobile">Created</th><th style={{ textAlign:'right' }}>Actions</th></tr>
               </thead>
               <tbody>
                 {users.map(u => (

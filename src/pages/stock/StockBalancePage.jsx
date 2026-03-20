@@ -175,12 +175,12 @@ export default function StockBalancePage() {
                   <th className="sort" onClick={()=>handleSort('name')}>Product <SA col="name"/></th>
                   <th>Category</th>
                   <th className="sort" style={{ textAlign:'right' }} onClick={()=>handleSort('quantity')}>Current Qty <SA col="quantity"/></th>
-                  <th style={{ textAlign:'right' }}>Total In</th>
-                  <th style={{ textAlign:'right' }}>Total Out</th>
+                  <th style={{ textAlign:'right' }} className="hide-mobile">Total In</th>
+                  <th style={{ textAlign:'right' }} className="hide-mobile">Total Out</th>
                   <th className="sort" style={{ textAlign:'right' }} onClick={()=>handleSort('stockVal')}>Stock Value <SA col="stockVal"/></th>
                   <th style={{ textAlign:'right' }}>Retail Value</th>
-                  <th style={{ textAlign:'right' }}>Pot. Profit</th>
-                  <th>Status</th>
+                  <th style={{ textAlign:'right' }} className="hide-mobile">Pot. Profit</th>
+                  <th className="hide-mobile">Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -195,8 +195,8 @@ export default function StockBalancePage() {
                       </td>
                       <td><span className="tag">{p.categoryName}</span></td>
                       <td className="mono" style={{ textAlign:'right', fontWeight:700, color:status==='out'?'var(--red)':status==='low'?'var(--amber)':'var(--text)' }}>{p.quantity}</td>
-                      <td className="mono" style={{ textAlign:'right', color:'var(--green)', fontSize:12 }}>+{p.totalIn}</td>
-                      <td className="mono" style={{ textAlign:'right', color:'var(--red)', fontSize:12 }}>−{p.totalOut}</td>
+                      <td className="mono hide-mobile" style={{ textAlign:'right', color:'var(--green)', fontSize:12 }}>+{p.totalIn}</td>
+                      <td className="mono hide-mobile" style={{ textAlign:'right', color:'var(--red)', fontSize:12 }}>−{p.totalOut}</td>
                       <td className="mono" style={{ textAlign:'right', fontSize:12 }}>{fmt(p.stockVal)}</td>
                       <td className="mono" style={{ textAlign:'right', fontSize:12, color:'var(--text-2)' }}>{fmt(p.retailVal)}</td>
                       <td className="mono" style={{ textAlign:'right', fontWeight:700, fontSize:12, color:p.potProfit>=0?'var(--green)':'var(--red)' }}>

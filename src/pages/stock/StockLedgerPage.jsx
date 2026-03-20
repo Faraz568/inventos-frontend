@@ -186,19 +186,19 @@ export default function StockLedgerPage() {
           <table className="data-table">
             <thead>
               <tr>
-                <th>Date</th><th>Reference</th><th>Type</th><th>Product</th><th>Category</th>
-                <th>Party</th><th style={{ textAlign:'right' }}>Qty In</th>
+                <th>Date</th><th className="hide-mobile">Reference</th><th>Type</th><th>Product</th><th>Category</th>
+                <th className="hide-mobile">Party</th><th style={{ textAlign:'right' }}>Qty In</th>
                 <th style={{ textAlign:'right' }}>Qty Out</th>
                 <th style={{ textAlign:'right' }}>Balance</th>
                 <th style={{ textAlign:'right' }}>Rate</th>
-                <th style={{ textAlign:'right' }}>Value</th>
-                <th>Note</th>
+                <th className="hide-mobile" style={{ textAlign:'right' }}>Value</th>
+                <th className="hide-mobile">Note</th>
               </tr>
             </thead>
             <tbody>
               {ledger.map(e=>(
                 <tr key={e.id}>
-                  <td className="mono muted" style={{ fontSize:11, whiteSpace:'nowrap' }}>
+                  <td className="mono muted hide-mobile" style={{ fontSize:11, whiteSpace:'nowrap' }}>
                     {new Date(e.date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'2-digit'})}
                   </td>
                   <td>
@@ -231,7 +231,7 @@ export default function StockLedgerPage() {
                   <td className="mono" style={{ textAlign:'right', fontWeight:500, color:e.type==='in'?'var(--green)':'var(--red)' }}>
                     {e.type==='in'?'+':'-'}{fmt(e.amount)}
                   </td>
-                  <td style={{ fontSize:11.5, color:'var(--text-3)', maxWidth:120, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                  <td className="hide-mobile" style={{ fontSize:11.5, color:'var(--text-3)', maxWidth:120, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
                     {e.note||'—'}
                   </td>
                 </tr>

@@ -241,10 +241,10 @@ export default function DatabasePage() {
               : <table className="data-table">
                   <thead>
                     <tr>
-                      <th>ID</th>
+                      <th className="hide-mobile">ID</th>
                       <th>Name</th>
-                      <th>Description</th>
-                      <th>Created</th>
+                      <th className="hide-mobile">Description</th>
+                      <th className="hide-mobile">Created</th>
                       <th>Products</th>
                       {isAdmin && <th style={{ textAlign:'right' }}>Actions</th>}
                     </tr>
@@ -303,7 +303,7 @@ export default function DatabasePage() {
               : <table className="data-table">
                   <thead>
                     <tr>
-                      <th>ID</th><th>Name</th><th>Category</th><th>Qty</th>
+                      <th className="hide-mobile">ID</th><th>Name</th><th>Category</th><th>Qty</th>
                       <th>Price ₹</th><th>Cost ₹</th><th>SKU</th><th>Reorder</th><th>Status</th>
                       {isAdmin && <th style={{ textAlign:'right' }}>Actions</th>}
                     </tr>

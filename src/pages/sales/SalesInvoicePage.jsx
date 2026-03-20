@@ -598,8 +598,8 @@ export default function SalesInvoicePage() {
                       <th>Invoice No.</th>
                       <th>Customer</th>
                       <th>Items</th>
-                      <th>Sold By</th>
-                      <th>Date</th>
+                      <th className="hide-mobile">Sold By</th>
+                      <th className="hide-mobile">Date</th>
                       <th style={{ textAlign:'right' }}>Total</th>
                       <th></th>
                     </tr>

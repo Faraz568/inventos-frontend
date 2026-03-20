@@ -497,11 +497,11 @@ export default function PurchasesPage() {
           <table className="data-table">
             <thead>
               <tr>
-                <th>ID</th>
+                <th className="hide-mobile">ID</th>
                 <th className="sort" onClick={() => handleSort('productName')}>Product <SortArrow col="productName" /></th>
-                <th className="sort" onClick={() => handleSort('supplierName')}>Supplier <SortArrow col="supplierName" /></th>
+                <th className="sort hide-mobile" onClick={() => handleSort('supplierName')}>Supplier <SortArrow col="supplierName" /></th>
                 <th className="sort" onClick={() => handleSort('quantity')}>Qty <SortArrow col="quantity" /></th>
-                <th className="sort" onClick={() => handleSort('unitCost')}>Unit Cost <SortArrow col="unitCost" /></th>
+                <th className="sort hide-mobile" onClick={() => handleSort('unitCost')}>Unit Cost <SortArrow col="unitCost" /></th>
                 <th className="sort" onClick={() => handleSort('totalCost')}>Total <SortArrow col="totalCost" /></th>
                 <th>Status</th>
                 <th className="sort" onClick={() => handleSort('purchasedAt')}>Date <SortArrow col="purchasedAt" /></th>

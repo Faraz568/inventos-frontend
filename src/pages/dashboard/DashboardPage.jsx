@@ -324,7 +324,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Quick Actions row — 4 cards full width */}
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:10 }}>
+          <div className="grid-4">
             {ACTIONS.map(a=>(
               <ActionBtn key={a.label} icon={a.icon} label={a.label} desc={a.desc} color={a.color} onClick={()=>navigate(a.to)}/>
             ))}
@@ -332,7 +332,7 @@ export default function DashboardPage() {
         </div>
 
         {/* ══ ROW 2 — KPI Cards ══════════════════════════════ */}
-        <div className="ds" style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12, marginBottom:16 }}>
+        <div className="ds grid-4" style={{ marginBottom:16 }}>
           <KpiCard label="Revenue"        value={fmt(revenue)}  sub={`${fSales.length} sales`}                      color="#16a05a" icon="💰" onClick={()=>navigate('/reports')}/>
           <KpiCard label="Purchases"      value={fmt(spend)}    sub={`${fPurch.filter(p=>p.status==='received').length} received`} color="#4a6cf7" icon="🛒" onClick={()=>navigate('/purchases')}/>
           <KpiCard label="Gross Profit"   value={fmt(Math.abs(profit))} sub={profit>=0?'▲ Profitable':'▼ Loss'} color={profit>=0?'#16a05a':'#dc3535'} icon={profit>=0?'📈':'📉'} onClick={()=>navigate('/reports')}/>
@@ -340,7 +340,7 @@ export default function DashboardPage() {
         </div>
 
         {/* ══ ROW 3 — Cash Flow Chart + P&L + Pending ═══════ */}
-        <div className="ds" style={{ display:'grid', gridTemplateColumns:'1fr 280px', gap:14, marginBottom:14 }}>
+        <div className="ds grid-main-aside-280" style={{ marginBottom:14 }}>
 
           {/* Cash Flow */}
           <Panel>
@@ -444,7 +444,7 @@ export default function DashboardPage() {
         </div>
 
         {/* ══ ROW 4 — Top Products + Recent Activity + Stock Alerts ═ */}
-        <div className="ds" style={{ display:'grid', gridTemplateColumns:'1fr 1fr 240px', gap:14 }}>
+        <div className="ds grid-3-col">
 
           {/* Top Products */}
           <Panel>

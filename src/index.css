@@ -772,3 +772,31 @@ html, body, #root {
   .page-content { padding: 68px 12px 36px; }
   .topnav-wrap { padding: 8px 10px; }
 }
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE UTILITY CLASSES (used by pages)
+══════════════════════════════════════════════════ */
+.grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.grid-main-aside-280 { display: grid; grid-template-columns: 1fr 280px; gap: 14px; }
+.grid-main-aside-320 { display: grid; grid-template-columns: 1fr 320px; gap: 16px; }
+.grid-main-aside-260 { display: grid; grid-template-columns: 1fr 260px; gap: 16px; }
+.grid-3-col { display: grid; grid-template-columns: 1fr 1fr 240px; gap: 14px; }
+
+@media (max-width: 768px) {
+  .grid-4 { grid-template-columns: 1fr 1fr; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .grid-main-aside-280 { grid-template-columns: 1fr; }
+  .grid-main-aside-320 { grid-template-columns: 1fr; }
+  .grid-main-aside-260 { grid-template-columns: 1fr; }
+  .grid-3-col { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .grid-4 { grid-template-columns: 1fr; }
+}
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.grid-single { display: block !important; }
+@media (max-width: 768px) {
+  .grid-3 { grid-template-columns: 1fr; }
+}

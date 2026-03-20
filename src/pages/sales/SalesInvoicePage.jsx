@@ -245,7 +245,7 @@ function NewInvoiceForm({ products, user, onSaved, onCancel }) {
   }
 
   return (
-    <div style={{ display:'grid', gridTemplateColumns:'1fr 260px', gap:16 }}>
+    <div className="grid-main-aside-260">
 
       
       <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
@@ -253,7 +253,7 @@ function NewInvoiceForm({ products, user, onSaved, onCancel }) {
         
         <div style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, padding:18 }}>
           <div style={{ fontSize:11, fontWeight:600, color:'var(--text-3)', textTransform:'uppercase', letterSpacing:'.07em', marginBottom:14 }}>Invoice Details</div>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12 }}>
+          <div className="grid-3">
             <div className="field">
               <label>Invoice No.</label>
               <input value={invoiceNo} onChange={e=>setInvoiceNo(e.target.value)}
@@ -548,7 +548,7 @@ export default function SalesInvoicePage() {
 
       
       {view==='list' && (
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12, marginBottom:20 }}>
+        <div className="grid-4" style={{ marginBottom:20 }}>
           {[
             { label:'Total Invoices', value:invoices.length, sub:'All time', color:'var(--accent)' },
             { label:'Total Revenue', value:fmtShort(totalRevenue), sub:fmt(totalRevenue), color:'var(--green)' },
@@ -567,7 +567,7 @@ export default function SalesInvoicePage() {
 
       
       {view==='list' && (
-        <div style={{ display:'grid', gridTemplateColumns: selInvoice?'1fr 320px':'1fr', gap:16 }}>
+        <div className={`grid-main-aside-320${!selInvoice ? ' grid-single' : ''}`}>
 
           
           <div>

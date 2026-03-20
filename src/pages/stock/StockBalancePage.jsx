@@ -132,7 +132,7 @@ export default function StockBalancePage() {
       </div>
 
       {/* Stats */}
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12, marginBottom:18 }}>
+      <div className="grid-4" style={{ marginBottom:18 }}>
         {[
           { label:'Stock Value (Cost)',   value:fmtS(totalCostVal),  sub:'At purchase price', color:'var(--accent)' },
           { label:'Stock Value (Retail)', value:fmtS(totalRetailVal),sub:'At selling price',  color:'#2563eb' },
@@ -164,7 +164,7 @@ export default function StockBalancePage() {
       </div>
 
       {/* Table */}
-      <div style={{ display:'grid', gridTemplateColumns:selected?'1fr 280px':'1fr', gap:16 }}>
+      <div className={`grid-main-aside-280${!selected ? ' grid-single' : ''}`}>
         <div className="table-wrap">
           {loading ? <div style={{ padding:40, textAlign:'center' }}><span className="spinner" style={{ width:20, height:20 }}/></div>
           : filtered.length===0 ? <div className="empty-state"><span className="empty-icon">⚖</span><span>No products found.</span></div>

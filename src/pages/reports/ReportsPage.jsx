@@ -309,7 +309,7 @@ export default function ReportsPage() {
           {monthlyData.length>0 ? <LineChart series={lineSeries} height={200}/> : <div className="empty-state" style={{padding:24}}>No monthly data yet</div>}
         </div>
 
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:20, marginBottom:20 }}>
+        <div className="grid-2" style={{ marginBottom:20 }}>
           <div className="card" style={{ padding:20 }}>
             <div style={{ fontFamily:'var(--mono)', fontSize:11, color:'var(--muted)', letterSpacing:'.08em', textTransform:'uppercase', marginBottom:16 }}>Monthly Revenue</div>
             <BarChart data={monthlyData.map(d=>({label:d.label,value:d.revenue}))} color="var(--teal)"/>
@@ -349,7 +349,7 @@ export default function ReportsPage() {
           <LineChart series={[{label:'Revenue',color:'var(--teal)',data:monthlyData.map(d=>({x:d.label,y:d.revenue}))}]} height={180}/>
         </div>
 
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:20, marginBottom:20 }}>
+        <div className="grid-2" style={{ marginBottom:20 }}>
           <div className="card" style={{ padding:20 }}>
             <div style={{ fontFamily:'var(--mono)', fontSize:11, color:'var(--muted)', letterSpacing:'.08em', textTransform:'uppercase', marginBottom:16 }}>Revenue by Category</div>
             <BarChart data={salesByCat} color="var(--teal)"/>
@@ -416,7 +416,7 @@ export default function ReportsPage() {
           <LineChart series={[{label:'Purchases',color:'var(--blue)',data:monthlyData.map(d=>({x:d.label,y:d.spent}))}]} height={180}/>
         </div>
 
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:20, marginBottom:20 }}>
+        <div className="grid-2" style={{ marginBottom:20 }}>
           <div className="card" style={{ padding:20 }}>
             <div style={{ fontFamily:'var(--mono)', fontSize:11, color:'var(--muted)', letterSpacing:'.08em', textTransform:'uppercase', marginBottom:16 }}>Spend by Category</div>
             <BarChart data={purchByCat} color="var(--blue)"/>
@@ -463,7 +463,7 @@ export default function ReportsPage() {
           <StatCard cls="red"   label="Out of Stock"    value={outOfStock}       sub="Needs reorder"/>
         </div>
 
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:20, marginBottom:20 }}>
+        <div className="grid-2" style={{ marginBottom:20 }}>
           <div className="card" style={{ padding:20 }}>
             <div style={{ fontFamily:'var(--mono)', fontSize:11, color:'var(--muted)', letterSpacing:'.08em', textTransform:'uppercase', marginBottom:16 }}>Stock Status</div>
             <DonutChart segments={[

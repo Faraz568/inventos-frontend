@@ -135,7 +135,7 @@ export default function StockLedgerPage() {
       </div>
 
       {/* Stats */}
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12, marginBottom:18 }}>
+      <div className="grid-4" style={{ marginBottom:18 }}>
         {[
           { label:'Total Entries', value:ledger.length,       sub:'Filtered movements',   color:'var(--accent)' },
           { label:'Stock In',      value:`+${totalIn}`,        sub:'Units received',        color:'var(--green)'  },

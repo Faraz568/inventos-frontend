@@ -641,7 +641,7 @@ html, body, #root {
   opacity: 0;
   transition: opacity 240ms ease;
 }
-.mobile-drawer-backdrop.open { opacity: 1; }
+.mobile-drawer-backdrop.open { display: block; opacity: 1; }
 
 .mobile-drawer {
   position: fixed;
@@ -774,7 +774,7 @@ html, body, #root {
   .search-btn-label,
   .search-kbd              { display: none; }
   .search-btn              { padding: 6px 8px; }
-  .mobile-drawer-backdrop  { display: block; }
+  /* backdrop shown only via .open class */
   .topnav-wrap             { padding: 10px 12px; }
   .topnav                  { padding: 0 10px; height: 46px; }
   .topnav-wrap.scrolled    { padding: 6px 12px; }
@@ -885,7 +885,6 @@ html, body, #root {
   }
   .mobile-drawer-backdrop {
     z-index: 9998;
-    pointer-events: all;
   }
   /* Fix table overflow - force scroll container */
   .table-wrap {

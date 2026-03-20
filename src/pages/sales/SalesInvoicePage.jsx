@@ -620,6 +620,7 @@ export default function SalesInvoicePage() {
               ))}
             </div>
             )}
+          </div>
 
           
           {selInvoice && (

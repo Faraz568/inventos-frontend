@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import {
   getMessages, sendMessage, subscribeMessages, fetchMessages,
-  getDmMessages, sendDmMessage, subscribeDm, fetchDmMessages,
+  getDmMessages, sendDmMessage, subscribeDm, fetchDmMessages, fetchKnownUsers,
   getKnownUsers, registerKnownUser, getUnreadDmCount, markDmRead,
   getDmKey
 } from '../../api/chatApi'
@@ -332,8 +332,17 @@ export default function ChatWidget() {
   useEffect(() => { if (user) registerKnownUser(user) }, [user])
 
   const refreshContacts = useCallback(() => {
-    const known = DEMO_MODE ? DEMO_USERS : getKnownUsers()
-    setContacts(known.filter(u => u.username !== user?.username))
+    if (DEMO_MODE) {
+      setContacts(DEMO_USERS.filter(u => u.username !== user?.username))
+      return
+    }
+    // Try cache first for instant render
+    const cached = getKnownUsers().filter(u => u.username !== user?.username)
+    if (cached.length > 0) setContacts(cached)
+    // Then fetch fresh from backend
+    fetchKnownUsers().then(users => {
+      setContacts(users.filter(u => u.username !== user?.username))
+    }).catch(() => {})
   }, [user])
   useEffect(() => { refreshContacts() }, [refreshContacts])
 
@@ -383,7 +392,20 @@ export default function ChatWidget() {
     prevCountRef.current = groupMsgs.length
   }, [groupMsgs, open, tab])
 
-  // DM unreads
+  // Sync ALL DM conversations from backend so unread counts & previews work across devices
+  useEffect(() => {
+    if (!user || DEMO_MODE) return
+    const syncAll = () => {
+      contacts.forEach(c => {
+        fetchDmMessages(user.username, c.username).catch(() => {})
+      })
+    }
+    syncAll() // immediate on contacts change
+    const iv = setInterval(syncAll, 8000) // background sync every 8s
+    return () => clearInterval(iv)
+  }, [contacts, user])
+
+  // DM unreads — recalculate after every sync
   useEffect(() => {
     if (!user) return
     const counts = {}
@@ -453,7 +475,7 @@ export default function ChatWidget() {
 
       {/* Chat panel */}
       {open && (
-        <div style={{
+        <div className="chat-panel" style={{
           position:'fixed', bottom:84, right:24, zIndex:399,
           width:380, maxWidth:'calc(100vw - 48px)',
           height:540, maxHeight:'calc(100vh - 120px)',

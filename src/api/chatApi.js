@@ -44,6 +44,23 @@ export function getKnownUsers() {
   try { return JSON.parse(localStorage.getItem(USERS_KEY) || '[]') } catch { return [] }
 }
 
+export async function fetchKnownUsers() {
+  if (DEMO_MODE) return getKnownUsers()
+  try {
+    const { data } = await api.get('/users')
+    const users = (data.data || []).map(u => ({
+      username:   u.username,
+      fullName:   u.fullName,
+      email:      u.email,
+      role:       u.role,
+      profilePic: u.profilePic || null,
+      joinedAt:   u.createdAt || null,
+    }))
+    localStorage.setItem(USERS_KEY, JSON.stringify(users))
+    return users
+  } catch { return getKnownUsers() }
+}
+
 // ─── Group Chat ─────────────────────────────────────────────────
 export function subscribeMessages(fn) {
   LISTENERS.add(fn)
@@ -115,6 +132,14 @@ export function getDmMessages(userA, userB) {
   return load(DM_KEY(userA, userB))
 }
 
+// Background refresh from backend - call this to sync across devices
+export async function refreshDmMessages(userA, userB) {
+  if (DEMO_MODE) return
+  try {
+    await fetchDmMessages(userA, userB)
+  } catch {}
+}
+
 export async function fetchDmMessages(userA, userB) {
   if (DEMO_MODE) return load(DM_KEY(userA, userB))
   try {
@@ -128,10 +153,12 @@ export async function fetchDmMessages(userA, userB) {
       ts:   m.sentAt,
     }))
     const key = DM_KEY(userA, userB)
-    save(key, msgs)
+    save(key, msgs)        // cache locally for offline/speed
     notifyDm(key, msgs)
     return msgs
-  } catch { return load(DM_KEY(userA, userB)) }
+  } catch {
+    return load(DM_KEY(userA, userB))  // fallback to cache if offline
+  }
 }
 
 export async function sendDmMessage({ from, to, role, text }) {
@@ -154,11 +181,14 @@ export async function sendDmMessage({ from, to, role, text }) {
     text: data.data.text,
     ts:   data.data.sentAt,
   }
+  // Optimistically add to local cache
   const msgs = load(key)
   msgs.push(msg)
   save(key, msgs)
   notifyDm(key, msgs)
   window.dispatchEvent(new CustomEvent('inv_dm_update', { detail: { key } }))
+  // Then re-fetch from backend to ensure full sync
+  fetchDmMessages(from, to).catch(() => {})
   return msg
 }
 

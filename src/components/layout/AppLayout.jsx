@@ -1,18 +1,18 @@
 import { useEffect, useState, useRef } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import ChatWidget from '../ui/ChatWidget'
 
 const NAV = [
-  { to:'/home',           label:'Home',      icon:'🏠' },
-  { to:'/sales',          label:'Sales',     icon:'📄' },
-  { to:'/products',       label:'Products',  icon:'▦'  },
-  { to:'/purchases',      label:'Purchases', icon:'↓'  },
-  { to:'/categories',     label:'Categories',icon:'◫'  },
-  { to:'/reports',        label:'Reports',   icon:'◻'  },
-  { to:'/stock/ledger',   label:'Ledger',    icon:'📒' },
-  { to:'/stock/balance',  label:'Balance',   icon:'⚖'  },
-  { to:'/database',       label:'DB',        icon:'⊞'  },
+  { to:'/home',           label:'Home',       icon:'🏠' },
+  { to:'/sales',          label:'Sales',      icon:'📄' },
+  { to:'/products',       label:'Products',   icon:'▦'  },
+  { to:'/purchases',      label:'Purchases',  icon:'↓'  },
+  { to:'/categories',     label:'Categories', icon:'◫'  },
+  { to:'/reports',        label:'Reports',    icon:'◻'  },
+  { to:'/stock/ledger',   label:'Ledger',     icon:'📒' },
+  { to:'/stock/balance',  label:'Balance',    icon:'⚖'  },
+  { to:'/database',       label:'DB',         icon:'⊞'  },
 ]
 
 function UserMenu({ user, isAdmin, logout }) {
@@ -75,9 +75,89 @@ function UserMenu({ user, isAdmin, logout }) {
   )
 }
 
+function MobileDrawer({ open, onClose, user, isAdmin, logout }) {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const ref = useRef(null)
+
+  useEffect(() => { onClose() }, [location.pathname])
+
+  useEffect(() => {
+    if (!open) return
+    const h = e => { if (ref.current && !ref.current.contains(e.target)) onClose() }
+    document.addEventListener('mousedown', h)
+    document.addEventListener('touchstart', h)
+    return () => {
+      document.removeEventListener('mousedown', h)
+      document.removeEventListener('touchstart', h)
+    }
+  }, [open])
+
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [open])
+
+  return (
+    <>
+      <div className={`mobile-drawer-backdrop${open ? ' open' : ''}`} onClick={onClose} />
+      <div ref={ref} className={`mobile-drawer${open ? ' open' : ''}`}>
+        <div className="mobile-drawer-header">
+          <NavLink to="/dashboard" className="topnav-logo" onClick={onClose}>
+            <div className="topnav-logo-mark">
+              <img src="/logo.png" alt="InventOS" style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:7 }} />
+            </div>
+            <span style={{ fontFamily:'var(--mono)', fontSize:14, fontWeight:500, color:'var(--text)', letterSpacing:'.06em' }}>InventOS</span>
+          </NavLink>
+          <button className="mobile-drawer-close" onClick={onClose} aria-label="Close menu">✕</button>
+        </div>
+
+        <div className="mobile-drawer-user">
+          <div style={{ width:38, height:38, borderRadius:'50%', overflow:'hidden', background:'var(--accent-dim)', border:'1px solid var(--accent-border)', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--accent)', fontFamily:'var(--mono)', fontSize:14, fontWeight:600, flexShrink:0 }}>
+            {user?.profilePic ? <img src={user.profilePic} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} /> : user?.username?.[0]?.toUpperCase()}
+          </div>
+          <div>
+            <div style={{ color:'var(--text)', fontSize:13, fontWeight:500 }}>{user?.fullName || user?.username}</div>
+            <div style={{ color:'var(--text-3)', fontSize:11, fontFamily:'var(--mono)' }}>{user?.email}</div>
+          </div>
+        </div>
+
+        <nav className="mobile-drawer-nav">
+          {NAV.map(n => (
+            <NavLink
+              key={n.to}
+              to={n.to}
+              className={({ isActive }) => `mobile-nav-link${isActive ? ' active' : ''}`}
+            >
+              <span className="mobile-nav-icon">{n.icon}</span>
+              {n.label}
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="mobile-drawer-footer">
+          <button className="mobile-drawer-action" onClick={() => { navigate('/settings'); onClose() }}>
+            <span>⚙</span> Settings
+          </button>
+          {isAdmin && (
+            <button className="mobile-drawer-action" onClick={() => { navigate('/admin'); onClose() }}>
+              <span>◈</span> Admin Panel
+            </button>
+          )}
+          <div style={{ borderTop:'1px solid var(--border)', margin:'6px 0' }} />
+          <button className="mobile-drawer-action danger" onClick={() => { logout(); onClose() }}>
+            <span>↩</span> Sign out
+          </button>
+        </div>
+      </div>
+    </>
+  )
+}
+
 export default function AppLayout({ children, title }) {
   const { user, isAdmin, logout } = useAuth()
   const [scrolled, setScrolled] = useState(false)
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 20)
@@ -90,11 +170,9 @@ export default function AppLayout({ children, title }) {
   return (
     <div className="app-layout">
 
-      
       <div className={`topnav-wrap${scrolled ? ' scrolled' : ''}`}>
         <nav className="topnav">
 
-          
           <NavLink to="/dashboard" className="topnav-logo">
             <div className="topnav-logo-mark">
               <img src="/logo.png" alt="InventOS" style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:7 }} />
@@ -102,7 +180,6 @@ export default function AppLayout({ children, title }) {
             <span className="topnav-logo-text">InventOS</span>
           </NavLink>
 
-          
           <div className="topnav-links">
             {NAV.map(n => (
               <NavLink key={n.to} to={n.to} className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
@@ -112,29 +189,37 @@ export default function AppLayout({ children, title }) {
             ))}
           </div>
 
-          
           <div className="topnav-right">
-            
-            <button onClick={triggerPalette} style={{
-              display:'flex', alignItems:'center', gap:5, background:'var(--raised)',
-              border:'1px solid var(--border-md)', borderRadius:7, padding:'4px 9px',
-              cursor:'pointer', fontSize:11, color:'var(--text-3)', fontFamily:'var(--font)',
-              transition:'all 140ms',
-            }}
-              onMouseEnter={e=>{ e.currentTarget.style.borderColor='var(--border-hi)'; e.currentTarget.style.color='var(--text-2)' }}
-              onMouseLeave={e=>{ e.currentTarget.style.borderColor='var(--border-md)'; e.currentTarget.style.color='var(--text-3)' }}>
+            <button onClick={triggerPalette} className="search-btn" aria-label="Search">
               <span style={{ fontSize:12 }}>⌕</span>
-              <span>Search</span>
-              <kbd style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:3, fontSize:9, padding:'1px 4px', fontFamily:'var(--mono)', color:'var(--text-3)' }}>⌘K</kbd>
+              <span className="search-btn-label">Search</span>
+              <kbd className="search-kbd">⌘K</kbd>
             </button>
 
-            <span style={{ color:'var(--text-3)', fontSize:10.5, fontFamily:'var(--mono)' }}>
+            <span className="topnav-date">
               {new Date().toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })}
             </span>
+
             <UserMenu user={user} isAdmin={isAdmin} logout={logout} />
+
+            <button
+              className="hamburger"
+              onClick={() => setDrawerOpen(true)}
+              aria-label="Open menu"
+            >
+              <span /><span /><span />
+            </button>
           </div>
         </nav>
       </div>
+
+      <MobileDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        user={user}
+        isAdmin={isAdmin}
+        logout={logout}
+      />
 
       <main className="page-content">{children}</main>
       <ChatWidget />

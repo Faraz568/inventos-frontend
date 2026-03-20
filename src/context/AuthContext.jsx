@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import { useNavigate } from 'react-router-dom'
 import { storage } from '../api/axiosInstance'
 import * as authApi from '../api/authApi'
+import api from '../api/axiosInstance'
 
 const AuthContext = createContext(null)
 
@@ -15,17 +16,25 @@ export function AuthProvider({ children }) {
     const t = storage.getToken()
     const u = storage.getUser()
     if (t && u) {
-      const pic = storage.getPic(u.id)
       setToken(t)
-      setUser({ ...u, profilePic: pic || u.profilePic || null })
+      setUser(u)
+      // refresh user from backend to get latest profilePic
+      api.get('/users/me').then(res => {
+        const fresh = res.data?.data
+        if (fresh) {
+          const merged = { ...u, ...fresh, profilePic: fresh.profilePic || u.profilePic || null }
+          setUser(merged)
+          storage.setUser(merged)
+        }
+      }).catch(() => {})
     }
     setLoading(false)
   }, [])
 
   const login = useCallback(async (creds) => {
     const { accessToken, user: u } = await authApi.login(creds)
-    const pic = storage.getPic(u.id)
-    const userWithPic = { ...u, profilePic: pic || null }
+    // profilePic comes from backend in the user object
+    const userWithPic = { ...u, profilePic: u.profilePic || null }
     storage.setToken(accessToken)
     storage.setUser(userWithPic)
     setToken(accessToken)
@@ -50,20 +59,17 @@ export function AuthProvider({ children }) {
     navigate('/login', { replace: true })
   }, [navigate])
 
-  const updateUser = (fields) => {
+  const updateUser = useCallback((fields) => {
     setUser(prev => {
       const updated = { ...prev, ...fields }
       storage.setUser(updated)
-      if (fields.profilePic !== undefined && prev?.id) {
-        if (fields.profilePic) {
-          storage.setPic(prev.id, fields.profilePic)
-        } else {
-          storage.removePic(prev.id)
-        }
+      // sync profilePic to backend so other devices see it
+      if (fields.profilePic !== undefined) {
+        api.put('/users/me/profile-pic', { profilePic: fields.profilePic || null }).catch(() => {})
       }
       return updated
     })
-  }
+  }, [])
 
   return (
     <AuthContext.Provider value={{

@@ -21,7 +21,9 @@ export const login = async (creds) => {
   }
   
   const { data } = await api.post('/auth/login', creds)
-  return data.data
+  const result = data.data
+  // fetch full user profile including profilePic
+  return result
 }
 
 export const initiateLogin = async (username, password) => {

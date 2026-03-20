@@ -147,7 +147,8 @@ function ProductModal({ product, categories, onClose, onSaved }) {
 export default function DatabasePage() {
   const { isAdmin } = useAuth()
   const toast = useToast()
-  const [tab, setTab] = useState('categories')
+  const [tab,  setTab]  = useState('categories')
+  const [view, setView] = useState('table')
 
   
   const [categories,  setCategories]  = useState([])

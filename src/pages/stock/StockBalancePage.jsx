@@ -34,6 +34,7 @@ export default function StockBalancePage() {
   const [sortBy,     setSort]      = useState('name')
   const [sortDir,    setSortDir]   = useState('asc')
   const [selected,   setSelected]  = useState(null)
+  const [view,       setView]       = useState('table')
   const [lastUpdated,setLastUpd]   = useState(new Date())
   const [pulse,      setPulse]     = useState(false)
   const intervalRef = useRef(null)

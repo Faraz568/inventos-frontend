@@ -366,6 +366,7 @@ export default function PurchasesPage() {
   const [statusFilter, setStatusFilter] = useState('')
   const [sortCol,      setSortCol]      = useState('purchasedAt')
   const [sortDir,      setSortDir]      = useState('desc')
+  const [view,         setView]         = useState('table')
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -461,7 +462,6 @@ export default function PurchasesPage() {
 
       {/* Toolbar */}
       <div className="toolbar">
-        <ViewToggle view={view} onChange={setView} />
         <ViewToggle view={view} onChange={setView} />
         <div className="search-wrap">
           <span className="search-icon" style={{ fontSize:13 }}>⌕</span>

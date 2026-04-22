@@ -16,7 +16,7 @@ export const storage = {
   removePic: (id) => { try { localStorage.removeItem(picKey(id)) } catch {} },
 }
 
-export const DEMO_MODE = false
+export const DEMO_MODE = true
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',

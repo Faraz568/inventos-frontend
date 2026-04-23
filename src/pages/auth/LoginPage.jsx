@@ -289,11 +289,7 @@ export default function LoginPage({ goRegister }) {
             <div style={{ marginTop:20, background:'var(--raised)', border:'1px solid var(--border-md)', borderRadius:'var(--r)', padding:'12px 14px' }}>
               <div style={{ color:'var(--text-2)', fontSize:11.5, fontFamily:'var(--mono)', marginBottom:8 }}>Demo — any password works</div>
               <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
-                {['admin','manager','john','sarah'].map(u => (
-                  <button key={u} type="button" className="btn btn-ghost btn-sm" onClick={() => setForm({ username:u, password:'demo' })}>
-                    {u}
-                  </button>
-                ))}
+              
               </div>
             </div>
           )}

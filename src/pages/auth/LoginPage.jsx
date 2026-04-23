@@ -287,7 +287,7 @@ export default function LoginPage({ goRegister }) {
 
           {DEMO_MODE && (
             <div style={{ marginTop:20, background:'var(--raised)', border:'1px solid var(--border-md)', borderRadius:'var(--r)', padding:'12px 14px' }}>
-              <div style={{ color:'var(--text-2)', fontSize:11.5, fontFamily:'var(--mono)', marginBottom:8 }}>Demo — any password works</div>
+
               <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
               
               </div>
